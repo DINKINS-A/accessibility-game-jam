@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
         Gamepad1,
         Gamepad2
     }
+
+    public const int RUMBLE_DURATION_SECONDS = 2;
     public AudioSource UniversalAudioSource;
     [Header("Input")]
     [Tooltip("Drag your PlayerInput.inputactions asset here (same asset on both players)")]
@@ -44,10 +46,23 @@ public class PlayerController : MonoBehaviour
         eastAction = playerMap.FindAction("Right", true);
         southAction = playerMap.FindAction("Left", true);
         westAction = playerMap.FindAction("Right", true);
-        leftShoulderAction = playerMap.FindAction("Left", true);
+        leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
         rightShoulderAction = playerMap.FindAction("Left", true);
+        leftShoulderAction.performed +=
+                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform));
+    }
 
-
+    private void VibrateLeftOrRight(GameObject o)
+    {
+        if (transform.position.x > o.transform.position.x)
+        {
+            Debug.Log("left");
+            HapticsManager.Instance.Rumble(Motor.Left, RUMBLE_DURATION_SECONDS);
+        } else
+        {
+            Debug.Log("right");
+            HapticsManager.Instance.Rumble(Motor.Right, RUMBLE_DURATION_SECONDS);
+        }
     }
 
     private void OnEnable()
@@ -145,7 +160,7 @@ public class PlayerController : MonoBehaviour
         return northAction.WasPressedThisFrame();
     }
 
-    public bool iSouthjActionButtonPressed()
+    public bool isSouthActionButtonPressed()
     {
         return southAction.WasPressedThisFrame();
     }

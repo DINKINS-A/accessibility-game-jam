@@ -18,9 +18,15 @@ public class Emitter : MonoBehaviour
     {
         playerController = collision.GetComponent<PlayerController>();
     }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+
+        Debug.Log(collision.collider.transform.position.x.ToString());
+    }
     //Upon collision with another GameObject, this GameObject will reverse direction
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.name);
         // TODO: Player Input Manager component
         //  limit 2 players
         //  assign persistent player identity on join (left or right) 
@@ -62,7 +68,7 @@ public class Emitter : MonoBehaviour
     {
         if (playerController)
         {
-            if (playerController.isRightShoulderButtonHeld() && playerController.iSouthjActionButtonPressed())
+            if (playerController.isRightShoulderButtonHeld() && playerController.isSouthActionButtonPressed())
             {
                 currentTone = TONE.CROSS;
             }
