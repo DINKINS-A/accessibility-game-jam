@@ -1,3 +1,4 @@
+using NUnit.Framework.Internal.Commands;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,6 +24,10 @@ public class PlayerController : MonoBehaviour
     private InputActionAsset inputActions; // this player's own copy
     private InputAction leftAction;
     private InputAction rightAction;
+    private InputAction buttonNorthAction;
+    private InputAction buttonSouthAction;
+    private InputAction buttonEastAction;
+    private InputAction buttonWestAction;
     public Rigidbody2D rb2D;
 
     private void Awake()
@@ -33,8 +38,11 @@ public class PlayerController : MonoBehaviour
         InputActionMap playerMap = inputActions.FindActionMap("Player", true);
         leftAction = playerMap.FindAction("Left", true);
         rightAction = playerMap.FindAction("Right", true);
+        buttonNorthAction = playerMap.FindAction("Button North", true);
+        buttonSouthAction = playerMap.FindAction("Button South", true);
+        buttonEastAction = playerMap.FindAction("Button East", true);
+        buttonWestAction = playerMap.FindAction("Button West", true);
 
-    
     }
 
     private void OnEnable()
@@ -103,5 +111,50 @@ public class PlayerController : MonoBehaviour
         {
             transform.Translate(Vector3.right * direction * moveSpeed * Time.deltaTime);
         }
+
+    }
+
+
+    public bool IsButtonPressed() {
+        // Check action button press
+        if (buttonNorthAction.WasPressedThisFrame())
+        {
+            return true;
+        }
+        else if (buttonSouthAction.WasPressedThisFrame())
+        {
+            return true;
+        }
+        else if (buttonWestAction.WasPressedThisFrame())
+        {
+            return true;
+        }
+        else if (buttonEastAction.WasPressedThisFrame())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public TONE GetPressedAction()
+    {
+        if (buttonNorthAction.WasPressedThisFrame())
+        {
+            return TONE.TRIANGLE;
+        }
+        else if (buttonSouthAction.WasPressedThisFrame())
+        {
+            return TONE.CROSS;
+        }
+        else if (buttonWestAction.WasPressedThisFrame())
+        {
+            return TONE.SQUARE;
+        }
+        else if (buttonEastAction.WasPressedThisFrame())
+        {
+            return TONE.CIRCLE;
+        }
+        Debug.Log("Error pressing button");
+        return TONE.NONE;
     }
 }
