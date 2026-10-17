@@ -4,9 +4,10 @@ using UnityEngine.Events;
 
 public class Emitter : MonoBehaviour
 {
-    private AudioClip currentTone;
+    private TONE currentTone;
     private short repititions;
     private int playerID;
+    private PlayerController playerController;
     
     void Start()
     {
@@ -15,10 +16,7 @@ public class Emitter : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject)
-        {
-
-        }
+        playerController = collision.GetComponent<PlayerController>();
     }
     //Upon collision with another GameObject, this GameObject will reverse direction
     private void OnTriggerEnter(Collider other)
@@ -62,6 +60,13 @@ public class Emitter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (playerController)
+        {
+            if (playerController.isRightShoulderButtonHeld() && playerController.iSouthjActionButtonPressed())
+            {
+                currentTone = TONE.CROSS;
+            }
+        }
     }
 
     /*
