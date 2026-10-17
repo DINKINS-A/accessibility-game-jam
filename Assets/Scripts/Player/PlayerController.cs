@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
         Gamepad1,
         Gamepad2
     }
-
+    public AudioSource UniversalAudioSource;
     [Header("Input")]
     [Tooltip("Drag your PlayerInput.inputactions asset here (same asset on both players)")]
     [SerializeField] private InputActionAsset inputActionsAsset;
@@ -89,6 +89,14 @@ public class PlayerController : MonoBehaviour
         inputActions.devices = device != null
             ? new InputDevice[] { device }
             : new InputDevice[0];
+    }
+    public void OnCollisionEnter2D(Collision2D collision)
+    {
+       if(collision.gameObject.CompareTag("walls"))
+        {
+            
+            UniversalAudioSource.PlayOneShot(AudioManager.Instance.GetWallsClip());
+        }
     }
 
     private void Update()
