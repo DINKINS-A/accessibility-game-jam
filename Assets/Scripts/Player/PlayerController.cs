@@ -23,6 +23,11 @@ public class PlayerController : MonoBehaviour
     private InputActionAsset inputActions; // this player's own copy
     private InputAction leftAction;
     private InputAction rightAction;
+    private InputAction northAction;
+    private InputAction southAction;
+    private InputAction eastAction;
+    private InputAction westAction;
+    private InputAction leftShoulderAction;
     public Rigidbody2D rb2D;
 
     private void Awake()
@@ -33,8 +38,13 @@ public class PlayerController : MonoBehaviour
         InputActionMap playerMap = inputActions.FindActionMap("Player", true);
         leftAction = playerMap.FindAction("Left", true);
         rightAction = playerMap.FindAction("Right", true);
+        northAction = playerMap.FindAction("Left", true);
+        eastAction = playerMap.FindAction("Right", true);
+        southAction = playerMap.FindAction("Left", true);
+        westAction = playerMap.FindAction("Right", true);
+        leftShoulderAction = playerMap.FindAction("Left", true);
 
-    
+
     }
 
     private void OnEnable()
@@ -111,5 +121,30 @@ public class PlayerController : MonoBehaviour
         {
             transform.Translate(Vector3.right * direction * moveSpeed * Time.deltaTime);
         }
+    }
+
+    public bool isLeftShoulderButtonPressed()
+    {
+        return leftShoulderAction.WasPressedThisFrame();
+    }
+
+    public bool isNorthActionButtonPressed()
+    {
+        return northAction.WasPressedThisFrame();
+    }
+
+    public bool iSouthjActionButtonPressed()
+    {
+        return southAction.WasPressedThisFrame();
+    }
+
+    public bool isEastActionButtonPressed()
+    {
+        return eastAction.WasPressedThisFrame();
+    }
+
+    public bool isWestActionButtonPressed()
+    {
+        return westAction.WasPressedThisFrame();
     }
 }
