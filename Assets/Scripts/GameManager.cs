@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     Game game;
+
+    Unity.Mathematics.Random prng = new Unity.Mathematics.Random(1);
 
     //[System.Serializable]
     //public class ToneMapping
@@ -121,54 +124,68 @@ public class GameManager : MonoBehaviour
             float leftBound = bounds.min.x;
             float rightBound = bounds.max.x;
 
+            List<float> leftSlots = new List<float>();
+            List<float> rightSlots = new List<float>();
+            var emitterExtent = 2;
+
+
+            float start = bounds.min.x + 1;
+            // half size
+            float xExtent = bounds.extents.x;
+            float xmax = start + xExtent * 2;
+            for (float i = 0; i < xExtent; i += emitterExtent)
+            {
+                leftSlots.Add(i);
+                rightSlots.Add(i);
+            }
+
             foreach (var c in distribution)
             {
-                int num = c - '0';
+                int repetitions = c - '0';
 
-                float start = bounds.min.x;
-                // half size
-                float xExtent = bounds.extents.x;
-                float xmax = start + xExtent * 2;
-
-                float randomX;
                 // to keep balance
-                if (totalLeft > distribution.Length / 2)
-                {
-                    // forse spawn on the right side
-                    leftBound = start + xExtent;
-                    rightBound = xmax;
-                } else if (totalRight > distribution.Length / 2)
-                {
-                    // forse spawn on the left side
-                    leftBound = start;
-                    rightBound = start + xExtent;
-                }
-                randomX = Random.Range(leftBound, rightBound);
-                if (randomX < start + xExtent)
-                {
-                    totalLeft++;
-                } else
-                {
-                    totalRight++;
-                }
+                
 
                 Vector3 spawnPosition = new Vector3(
-                    randomX,
+                    start,
                     bounds.max.y,
                     0f
                 );
+
+                var isLeft = prng.NextBool();
+                float deltaY = 0.5f;
+                float deltaX = 2;
+
+                if (totalLeft < distribution.Length / 2 && isLeft)
+                {
+                    // forse spawn on the right side
+                    var r = prng.NextInt(0, leftSlots.Count - 1);
+                    deltaX = leftSlots[r];
+                    leftSlots.RemoveAt(r);
+                    totalLeft++;
+                } else
+                {
+                    // forse spawn on the left side
+                    var r = prng.NextInt(0, rightSlots.Count - 1);
+                    deltaX = xExtent + rightSlots[r];
+                    rightSlots.RemoveAt(r);
+                    totalRight++;
+                }
+                spawnPosition.y += deltaY;
+                spawnPosition.x += deltaX;
                 var emitter = Instantiate<Emitter>(
                     emitterPrefab,
                     spawnPosition,
                     Quaternion.identity
                 );
+                emitter.SetRepititions((short)repetitions);
                 emitters.Add(emitter.gameObject);
                 float emitterHalfHeight = emitter.GetComponent<Collider2D>().bounds.extents.y / 2;
                 emitter.transform.Translate(0, emitterHalfHeight, 0);
 
             }
         } else
-        {
+        {   
             Debug.LogError("Not found Ground GameObject with tag 'Ground'. Add tag to detect Emitter spawn area.");
         }
     }
