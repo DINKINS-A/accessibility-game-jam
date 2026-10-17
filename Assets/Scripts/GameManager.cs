@@ -27,6 +27,8 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     List<GameObject> emitters;
+    List<GameObject> leftEmitters;
+    List<GameObject> rightEmitters;
 
     void Awake()
     {
@@ -38,6 +40,10 @@ public class GameManager : MonoBehaviour
         Instance = this;
         game = new Game();
         emitters = new List<GameObject>();
+
+        leftEmitters = new List<GameObject>();
+
+        rightEmitters = new List<GameObject>();
         //toneAudioMap = new Dictionary<int, AudioSource>();
 
         //foreach (ToneMapping mapping in toneMappings)
@@ -155,8 +161,8 @@ public class GameManager : MonoBehaviour
                 var isLeft = prng.NextBool();
                 float deltaY = 0.5f;
                 float deltaX = 2;
-
-                if (totalLeft < distribution.Length / 2 && isLeft)
+                bool isChoiceLeft = totalLeft < distribution.Length / 2 && isLeft;
+                if (isChoiceLeft)
                 {
                     // forse spawn on the right side
                     var r = prng.NextInt(0, leftSlots.Count - 1);
@@ -180,6 +186,14 @@ public class GameManager : MonoBehaviour
                 );
                 emitter.SetRepititions((short)repetitions);
                 emitters.Add(emitter.gameObject);
+                if (isChoiceLeft)
+                {
+                    leftEmitters.Add(emitter.gameObject);
+                }
+                else
+                {
+                    rightEmitters.Add(emitter.gameObject);
+                }
                 float emitterHalfHeight = emitter.GetComponent<Collider2D>().bounds.extents.y / 2;
                 emitter.transform.Translate(0, emitterHalfHeight, 0);
 
@@ -193,10 +207,21 @@ public class GameManager : MonoBehaviour
     public GameObject getNearestEmitter(Transform t)
     {
         GameObject nearestEmitter = null;
+        var middleWall = GameObject.FindWithTag("middle_wall");
         float nearestDistance = 0.0f;
-        foreach (var e in emitters) {
+        bool isLeftPlayer = middleWall.transform.position.x > t.position.x;
+        var emittersToCheck = isLeftPlayer ? leftEmitters : rightEmitters;
+        foreach (var e in emittersToCheck) {
             var diff = t.position.x - e.transform.position.x;
-            if (nearestEmitter == null || (nearestDistance < 0 ? -nearestDistance : nearestDistance) > (diff < 0 ? -diff : diff))
+
+            //var pos = transform.position;
+            //pos.y ;
+            //var leftCast = Physics2D.Raycast(transform.Translate(0, 1, 0).transform.position, Vector2.left);
+            //var rightCast = Physics2D.Raycast(transform.position, Vector2.right);
+            //var leftO = leftCast.collider.gameObject;
+            //var rightO = rightCast.collider.gameObject;
+
+            if (nearestEmitter == null || System.Math.Abs(nearestDistance) > System.Math.Abs(diff))
             {
                 nearestDistance = diff;
                 nearestEmitter = e;
