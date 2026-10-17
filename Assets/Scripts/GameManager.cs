@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance { get; private set; }
 
+    List<GameObject> emitters;
+
     void Awake()
     {
         if (Instance != null)
@@ -32,6 +34,7 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
         game = new Game();
+        emitters = new List<GameObject>();
         //toneAudioMap = new Dictionary<int, AudioSource>();
 
         //foreach (ToneMapping mapping in toneMappings)
@@ -158,11 +161,10 @@ public class GameManager : MonoBehaviour
                     spawnPosition,
                     Quaternion.identity
                 );
+                emitters.Add(emitter.gameObject);
                 float emitterHalfHeight = emitter.GetComponent<Collider2D>().bounds.extents.y / 2;
                 emitter.transform.Translate(0, emitterHalfHeight, 0);
 
-
-                // TODO: detect player id and either place it left or right side
             }
         } else
         {
@@ -170,8 +172,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void InitPattern(List<int> answer)
+    public GameObject getNearestEmitter(Transform t)
     {
+        GameObject nearestEmitter = null;
+        float nearestDistance = 0.0f;
+        foreach (var e in emitters) {
+            var diff = t.position.x - e.transform.position.x;
+            if ((nearestDistance < 0 ? -nearestDistance : nearestDistance) > (diff < 0 ? -diff : diff))
+            {
+                nearestDistance = diff;
+                nearestEmitter = e;
+            }
+            ;
+        }
+        return nearestEmitter;
     }
 
     public void Test()
