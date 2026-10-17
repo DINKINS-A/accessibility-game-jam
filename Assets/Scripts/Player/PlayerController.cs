@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
         Gamepad2
     }
 
+    public Emitter? touchingEmitter;
     public const int RUMBLE_DURATION_SECONDS = 2;
     public AudioSource UniversalAudioSource;
     [Header("Input")]
@@ -42,14 +43,46 @@ public class PlayerController : MonoBehaviour
         InputActionMap playerMap = inputActions.FindActionMap("Player", true);
         leftAction = playerMap.FindAction("Left", true);
         rightAction = playerMap.FindAction("Right", true);
-        northAction = playerMap.FindAction("Left", true);
-        eastAction = playerMap.FindAction("Right", true);
-        southAction = playerMap.FindAction("Left", true);
-        westAction = playerMap.FindAction("Right", true);
+        northAction = playerMap.FindAction("North Button", true);
+        eastAction = playerMap.FindAction("East Button", true);
+        southAction = playerMap.FindAction("South Button", true);
+        westAction = playerMap.FindAction("West Button", true);
         leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
-        rightShoulderAction = playerMap.FindAction("Left", true);
+        rightShoulderAction = playerMap.FindAction("Right Shoulder", true);
         leftShoulderAction.performed +=
                 context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform));
+        southAction.performed +=
+                context => SetActiveEmitter(TONE.CROSS);
+        westAction.performed +=
+                context => SetActiveEmitter(TONE.SQUARE);
+        eastAction.performed +=
+                context => SetActiveEmitter(TONE.CIRCLE);
+        northAction.performed +=
+                context => SetActiveEmitter(TONE.TRIANGLE);
+
+        //rightShoulderAction.performed +=
+        //    context => TryAssignNote(GameManager.Instance.getNearestEmitter(transform));
+    }
+
+    public void SetTouchingEmitter(Emitter e)
+    {
+        touchingEmitter = e;
+    }
+    public void UnsetTouchingEmitter()
+    {
+        touchingEmitter = null;
+    }
+
+    private void SetActiveEmitter(TONE tone)
+    {
+        if (touchingEmitter)
+        {
+            touchingEmitter.Assign(tone);
+            Debug.Log("Set touching emitter to " + tone);
+        } else
+        {
+            Debug.Log("No touching emitter found.");
+        }
     }
 
     private void VibrateLeftOrRight(GameObject o)
@@ -152,7 +185,7 @@ public class PlayerController : MonoBehaviour
 
     public bool isRightShoulderButtonHeld()
     {
-        return rightAction.WasPerformedThisFrame();
+        return rightShoulderAction.WasPerformedThisFrame();
     }
 
     public bool isNorthActionButtonPressed()
