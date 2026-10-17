@@ -179,7 +179,7 @@ public class GameManager : MonoBehaviour
         float nearestDistance = 0.0f;
         foreach (var e in emitters) {
             var diff = t.position.x - e.transform.position.x;
-            if ((nearestDistance < 0 ? -nearestDistance : nearestDistance) > (diff < 0 ? -diff : diff))
+            if (nearestEmitter == null || (nearestDistance < 0 ? -nearestDistance : nearestDistance) > (diff < 0 ? -diff : diff))
             {
                 nearestDistance = diff;
                 nearestEmitter = e;
