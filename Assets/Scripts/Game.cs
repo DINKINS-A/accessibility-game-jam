@@ -47,16 +47,16 @@ public class Game : MonoBehaviour
         foreach(var c in answerS) {
             switch (c)
             {
-                case 'X':
+                case 'A':
                     res.Append(TONE.CROSS);
                     break;
-                case 'O':
+                case 'B':
                     res.Append(TONE.CIRCLE);
                     break;
-                case 'T':
+                case 'C':
                     res.Append(TONE.TRIANGLE);
                     break;
-                case 'S':
+                case 'D':
                     res.Append(TONE.SQUARE);
                     break;
                 default:
