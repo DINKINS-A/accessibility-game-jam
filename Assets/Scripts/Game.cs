@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -35,6 +36,35 @@ public class Game : MonoBehaviour
         answer = new Queue<TONE>();
     }
 
+    public void SetAnswer(Queue<TONE> answer)
+    {
+        this.answer = answer;
+    }
+
+    public Queue<TONE> ParseAnswerLine(string answerS)
+    {
+        Queue<TONE> res = new Queue<TONE>();
+        foreach(var c in answerS) {
+            switch (c)
+            {
+                case 'X':
+                    res.Append(TONE.CROSS);
+                    break;
+                case 'O':
+                    res.Append(TONE.CIRCLE);
+                    break;
+                case 'T':
+                    res.Append(TONE.TRIANGLE);
+                    break;
+                case 'S':
+                    res.Append(TONE.SQUARE);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return res;
+    }
 
     public void Enqueue(TONE tone)
     {
