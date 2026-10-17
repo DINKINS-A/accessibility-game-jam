@@ -14,19 +14,22 @@ public class Emitter : MonoBehaviour
         repititions = 0;
         //gameObject.SendMessage("Enqueue", 5.0);
     }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("OnTriggerEnter2D" + collision.name);
         playerController = collision.GetComponent<PlayerController>();
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
 
         Debug.Log(collision.collider.transform.position.x.ToString());
+        playerController = collision.gameObject.GetComponent<PlayerController>();
     }
     //Upon collision with another GameObject, this GameObject will reverse direction
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.name);
+        Debug.Log("OnTriggerEnter" + other.name);
         // TODO: Player Input Manager component
         //  limit 2 players
         //  assign persistent player identity on join (left or right) 
@@ -68,6 +71,8 @@ public class Emitter : MonoBehaviour
     {
         if (playerController)
         {
+            var a = playerController.isRightShoulderButtonHeld();
+            var b = playerController.isSouthActionButtonPressed();
             if (playerController.isRightShoulderButtonHeld() && playerController.isSouthActionButtonPressed())
             {
                 currentTone = TONE.CROSS;
