@@ -1,3 +1,4 @@
+using Unity.AppUI.Editor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -28,6 +29,7 @@ public class PlayerController : MonoBehaviour
     private InputAction eastAction;
     private InputAction westAction;
     private InputAction leftShoulderAction;
+    private InputAction rightShoulderAction;
     public Rigidbody2D rb2D;
 
     private void Awake()
@@ -43,6 +45,7 @@ public class PlayerController : MonoBehaviour
         southAction = playerMap.FindAction("Left", true);
         westAction = playerMap.FindAction("Right", true);
         leftShoulderAction = playerMap.FindAction("Left", true);
+        rightShoulderAction = playerMap.FindAction("Left", true);
 
 
     }
@@ -126,6 +129,15 @@ public class PlayerController : MonoBehaviour
     public bool isLeftShoulderButtonPressed()
     {
         return leftShoulderAction.WasPressedThisFrame();
+    }
+    public bool isRightShoulderButtonPressed()
+    {
+        return rightShoulderAction.WasPressedThisFrame();
+    }
+
+    public bool isRightShoulderButtonHeld()
+    {
+        return rightAction.WasPerformedThisFrame();
     }
 
     public bool isNorthActionButtonPressed()
