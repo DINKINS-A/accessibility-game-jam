@@ -41,7 +41,9 @@ public class AudioManager : MonoBehaviour
 
     public AudioClip GetWestTone() { return westTone; }
 
-    public AudioClip GetWallsClip() { return wallsClip; }
+    public AudioClip GetWallsClip() {
+        Debug.Log("audio");
+            return wallsClip; }
 
     public AudioClip GetWinClip() { return winClip; }
 
