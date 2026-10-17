@@ -128,19 +128,20 @@ public class GameManager : MonoBehaviour
                 float start = bounds.min.x;
                 // half size
                 float xExtent = bounds.extents.x;
+                float xmax = start + xExtent * 2;
 
                 float randomX;
                 // to keep balance
                 if (totalLeft > distribution.Length / 2)
                 {
                     // forse spawn on the right side
-                    leftBound = bounds.min.x + bounds.max.x / 2;
-                    rightBound = bounds.max.x;
+                    leftBound = start + xExtent;
+                    rightBound = xmax;
                 } else if (totalRight > distribution.Length / 2)
                 {
                     // forse spawn on the left side
-                    rightBound = bounds.max.x / 2;
-                    leftBound = bounds.min.x;
+                    leftBound = start;
+                    rightBound = start + xExtent;
                 }
                 randomX = Random.Range(leftBound, rightBound);
                 if (randomX < start + xExtent)
