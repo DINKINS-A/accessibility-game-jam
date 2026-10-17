@@ -101,7 +101,7 @@ public class Emitter : MonoBehaviour
     {
         for (int count = 0; count < repititions; count++)
         {
-            HapticsManager.Instance.Pulse(10, 10, 1);
+            //HapticsManager.Instance.Pulse(10, 10, 1);
         }
     }
 }
