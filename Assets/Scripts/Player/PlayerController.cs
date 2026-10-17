@@ -1,3 +1,4 @@
+using System;
 using Unity.AppUI.Editor;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -49,11 +50,45 @@ public class PlayerController : MonoBehaviour
         leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
         rightShoulderAction = playerMap.FindAction("Left", true);
         leftShoulderAction.performed +=
-                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform));
+                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device);
     }
 
-    private void VibrateLeftOrRight(GameObject o)
+    private void VibrateLeftOrRight(GameObject o, InputDevice device)
     {
+        if (device is Gamepad gam)
+        {
+            Predicate<Gamepad> pre = delegate(Gamepad device){return device is Gamepad;};
+
+            int index= Gamepad.all.IndexOf(pre);
+
+            if (index == 0)
+            {
+                if (transform.position.x > o.transform.position.x)
+                {
+                    Debug.Log("left");
+                    HapticsManager.Instance.Rumble(Motor.Left, RUMBLE_DURATION_SECONDS, GamepadTarget.Gamepad1);
+                } else
+                {
+                    Debug.Log("right");
+                    HapticsManager.Instance.Rumble(Motor.Right, RUMBLE_DURATION_SECONDS, GamepadTarget.Gamepad1);
+                }
+            }
+
+            else if (index == 1)
+            {
+                if (transform.position.x > o.transform.position.x)
+                {
+                    Debug.Log("left");
+                    HapticsManager.Instance.Rumble(Motor.Left, RUMBLE_DURATION_SECONDS, GamepadTarget.Gamepad2);
+                } else
+                {
+                    Debug.Log("right");
+                    HapticsManager.Instance.Rumble(Motor.Right, RUMBLE_DURATION_SECONDS, GamepadTarget.Gamepad2);
+                }
+            }
+
+            
+        
         if (transform.position.x > o.transform.position.x)
         {
             Debug.Log("left");
@@ -62,6 +97,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("right");
             HapticsManager.Instance.Rumble(Motor.Right, RUMBLE_DURATION_SECONDS);
+        }
         }
     }
 
