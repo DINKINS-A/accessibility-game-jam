@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,7 @@ public class GameManager : MonoBehaviour
 {
     Game game;
 
-    Unity.Mathematics.Random prng = new Unity.Mathematics.Random(1);
+    Unity.Mathematics.Random prng = new Unity.Mathematics.Random((uint)DateTime.Now.Second);
 
     //[System.Serializable]
     //public class ToneMapping
