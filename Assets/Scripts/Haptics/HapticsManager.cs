@@ -4,10 +4,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 public enum Motor { Left, Right, Both }
+public enum GamepadTarget { Gamepad1, Gamepad2, Both }
 
 public class HapticsManager : MonoBehaviour
 {
     const string PrefKey = "rumbleIntensity";
+    const int MaxPads = 2;
 
     static HapticsManager instance;
     public static HapticsManager Instance
@@ -26,10 +28,11 @@ public class HapticsManager : MonoBehaviour
     public float Intensity { get; private set; } = 1f;     // 0 to 1, set by the slider
     public event Action<float> IntensityChanged;
 
-    bool leftOn;     // heavy, low-frequency motor
-    bool rightOn;    // light, high-frequency motor
-    Coroutine leftRoutine;
-    Coroutine rightRoutine;
+    // Per-gamepad state: index 0 = Gamepad1, index 1 = Gamepad2
+    readonly bool[] leftOn = new bool[MaxPads];     // heavy, low-frequency motor
+    readonly bool[] rightOn = new bool[MaxPads];    // light, high-frequency motor
+    readonly Coroutine[] leftRoutine = new Coroutine[MaxPads];
+    readonly Coroutine[] rightRoutine = new Coroutine[MaxPads];
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Bootstrap() { var _ = Instance; }
@@ -50,47 +53,60 @@ public class HapticsManager : MonoBehaviour
         Intensity = value;
         PlayerPrefs.SetFloat(PrefKey, Intensity);
         IntensityChanged?.Invoke(Intensity);
+
+        // Update any pads that are currently rumbling
+        for (int i = 0; i < MaxPads; i++) Apply(i);
     }
 
-    // Rumble the left motor, the right motor, or both, for the given seconds
-    public void Rumble(Motor motor, float seconds)
+    // Rumble the left motor, the right motor, or both, on Gamepad1, Gamepad2, or both pads
+    public void Rumble(Motor motor, float seconds, GamepadTarget target = GamepadTarget.Both)
+    {
+        if (target == GamepadTarget.Gamepad1 || target == GamepadTarget.Both)
+            RumblePad(0, motor, seconds);
+
+        if (target == GamepadTarget.Gamepad2 || target == GamepadTarget.Both)
+            RumblePad(1, motor, seconds);
+    }
+
+    void RumblePad(int pad, Motor motor, float seconds)
     {
         if (motor == Motor.Left || motor == Motor.Both)
         {
-            if (leftRoutine != null) StopCoroutine(leftRoutine);
-            leftRoutine = StartCoroutine(MotorRoutine(true, seconds));
+            if (leftRoutine[pad] != null) StopCoroutine(leftRoutine[pad]);
+            leftRoutine[pad] = StartCoroutine(MotorRoutine(pad, true, seconds));
         }
 
         if (motor == Motor.Right || motor == Motor.Both)
         {
-            if (rightRoutine != null) StopCoroutine(rightRoutine);
-            rightRoutine = StartCoroutine(MotorRoutine(false, seconds));
+            if (rightRoutine[pad] != null) StopCoroutine(rightRoutine[pad]);
+            rightRoutine[pad] = StartCoroutine(MotorRoutine(pad, false, seconds));
         }
     }
 
-    IEnumerator MotorRoutine(bool left, float seconds)
+    IEnumerator MotorRoutine(int pad, bool left, float seconds)
     {
-        if (left) leftOn = true; else rightOn = true;
-        Apply();
+        if (left) leftOn[pad] = true; else rightOn[pad] = true;
+        Apply(pad);
 
         yield return new WaitForSecondsRealtime(seconds);
 
-        if (left) leftOn = false; else rightOn = false;
-        Apply();
+        if (left) leftOn[pad] = false; else rightOn[pad] = false;
+        Apply(pad);
     }
 
-    // Sends the active motors to the controller at the slider's intensity
-    void Apply()
+    // Sends the active motors of one gamepad to the controller at the slider's intensity
+    void Apply(int padIndex)
     {
-        bool silent = Intensity <= 0f || (!leftOn && !rightOn);
+        if (padIndex >= Gamepad.all.Count) return;   // that gamepad isn't connected
+        Gamepad pad = Gamepad.all[padIndex];
 
-        foreach (var pad in Gamepad.all)
-        {
-            if (silent)
-                pad.ResetHaptics();
-            else
-                pad.SetMotorSpeeds(leftOn ? Intensity : 0f, rightOn ? Intensity : 0f);
-        }
+        bool silent = Intensity <= 0f || (!leftOn[padIndex] && !rightOn[padIndex]);
+
+        if (silent)
+            pad.ResetHaptics();
+        else
+            pad.SetMotorSpeeds(leftOn[padIndex] ? Intensity : 0f,
+                               rightOn[padIndex] ? Intensity : 0f);
     }
 
     void OnDisable()
