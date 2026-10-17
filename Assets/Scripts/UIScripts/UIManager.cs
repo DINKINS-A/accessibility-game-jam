@@ -115,9 +115,21 @@ public class UIManager : MonoBehaviour
     }
 
     // PauseMenu
-    public void OnResumeButtonClicked() => PauseMenu.SetActive(false);
-    public void OnOptionButtonClicked() => PauseOptionsMenu.SetActive(true);
-    public void OnMainMenuButtonClicked() => SceneManager.LoadScene("Menu");
+    public void OnResumeButtonClicked()
+    {
+        PauseMenu.SetActive(false);
+        Time.timeScale = 1.0f;
+    }
+    public void OnOptionButtonClicked()
+    {
+        PauseOptionsMenu.SetActive(true);
+        PauseMenu.SetActive(false);
+    }
+    public void OnMainMenuButtonClicked()
+    {
+        SceneManager.LoadScene("Menu");
+        Time.timeScale = 1.0f;
+    }
 
     public void OnPauseOptionsBackClick()
     {
