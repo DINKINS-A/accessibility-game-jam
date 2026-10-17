@@ -42,26 +42,27 @@ public class PlayerController : MonoBehaviour
         InputActionMap playerMap = inputActions.FindActionMap("Player", true);
         leftAction = playerMap.FindAction("Left", true);
         rightAction = playerMap.FindAction("Right", true);
-        northAction = playerMap.FindAction("Left", true);
-        eastAction = playerMap.FindAction("Right", true);
-        southAction = playerMap.FindAction("Left", true);
-        westAction = playerMap.FindAction("Right", true);
+        northAction = playerMap.FindAction("North", true);
+        eastAction = playerMap.FindAction("East", true);
+        southAction = playerMap.FindAction("South", true);
+        westAction = playerMap.FindAction("West", true);
         leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
-        rightShoulderAction = playerMap.FindAction("Left", true);
+        rightShoulderAction = playerMap.FindAction("Right Shoulder", true);
         leftShoulderAction.performed +=
-                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform));
+                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
     }
 
-    private void VibrateLeftOrRight(GameObject o)
+    private void VibrateLeftOrRight(GameObject o, string name)
     {
+        GamepadTarget target = name.Equals("DualSenseGamepadHID") ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
         if (transform.position.x > o.transform.position.x)
         {
             Debug.Log("left");
-            HapticsManager.Instance.Rumble(Motor.Left, RUMBLE_DURATION_SECONDS);
+            HapticsManager.Instance.Rumble(Motor.Left, RUMBLE_DURATION_SECONDS, target);
         } else
         {
             Debug.Log("right");
-            HapticsManager.Instance.Rumble(Motor.Right, RUMBLE_DURATION_SECONDS);
+            HapticsManager.Instance.Rumble(Motor.Right, RUMBLE_DURATION_SECONDS, target);
         }
     }
 
