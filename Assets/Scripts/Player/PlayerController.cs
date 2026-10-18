@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public Emitter? touchingEmitter;
-    public const int RUMBLE_DURATION_SECONDS = 2;
+    public const float RUMBLE_DURATION_SECONDS = 1f;
     public AudioSource UniversalAudioSource;
     [Header("Input")]
     [Tooltip("Drag your PlayerInput.inputactions asset here (same asset on both players)")]
@@ -43,10 +43,14 @@ public class PlayerController : MonoBehaviour
         InputActionMap playerMap = inputActions.FindActionMap("Player", true);
         leftAction = playerMap.FindAction("Left", true);
         rightAction = playerMap.FindAction("Right", true);
+        northAction = playerMap.FindAction("North", true);
+        eastAction = playerMap.FindAction("East", true);
+        southAction = playerMap.FindAction("South", true);
+        westAction = playerMap.FindAction("West", true);
         leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
         rightShoulderAction = playerMap.FindAction("Right Shoulder", true);
         leftShoulderAction.performed +=
-                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform));
+                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
         southAction.performed +=
                 context => SetActiveEmitter(TONE.CROSS);
         westAction.performed +=
@@ -55,6 +59,7 @@ public class PlayerController : MonoBehaviour
                 context => SetActiveEmitter(TONE.CIRCLE);
         northAction.performed +=
                 context => SetActiveEmitter(TONE.TRIANGLE);
+    }
 
         //rightShoulderAction.performed +=
         //    context => TryAssignNote(GameManager.Instance.getNearestEmitter(transform));
@@ -78,13 +83,6 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("No touching emitter found.");
         }
-        northAction = playerMap.FindAction("North", true);
-        eastAction = playerMap.FindAction("East", true);
-        southAction = playerMap.FindAction("South", true);
-        westAction = playerMap.FindAction("West", true);
-        leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
-        leftShoulderAction.performed +=
-                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
 
     }
 
