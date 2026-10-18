@@ -122,10 +122,8 @@ public class GameManager : MonoBehaviour
         rightEmitters.Clear();
     }
 
-    public void LoadLevel(Scene scene)
+    public void LoadLevel(UnityEngine.SceneManagement.Scene scene)
     {
-        // The previous scene's emitters are already destroyed. Drop the stale references.
-        ClearEmitters();
         //SceneManager.LoadScene("Levels/" + levelId);
         TextAsset file = Resources.Load<TextAsset>($"{scene.name}");
         List<string> answerConfig = null;
@@ -160,6 +158,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError($"{scene.name} textfile with pattern / answer not found");
         }
+        GameObject obj = GameObject.FindWithTag("Ground");
 
         int totalEmitters = 0;
 
@@ -171,94 +170,123 @@ public class GameManager : MonoBehaviour
             totalEmitters = distribution.Length;
         }
 
-        GameObject ground = GameObject.FindWithTag("Ground");
-        if (ground == null)
+
+        if (obj != null)
+        {
+            var emitterCollider = obj.GetComponent<Collider2D>();
+            // dont fly away
+            Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.constraints |= RigidbodyConstraints2D.FreezePositionY;
+            }
+            Bounds bounds = emitterCollider.bounds;
+
+            float leftBound = bounds.min.x;
+            float rightBound = bounds.max.x;
+
+
+            float start = bounds.min.x + 1;
+            // half size
+            float xExtent = bounds.extents.x;
+            float xmax = start + xExtent * 2;
+
+            var totalLeft = new List<char>();
+            var totalRight = new List<char>();
+            // determine left / right dist
+            foreach (var c in distribution)
+            {
+                var isLeft = prng.NextBool();
+                bool isForceLeft = totalRight.Count >= distribution.Length / 2;
+                bool isForceRight = totalLeft.Count >= distribution.Length / 2;
+                if (isForceLeft || (isLeft && !isForceRight))
+                {
+                    // forse spawn on the right side
+                    totalLeft.Add(c);
+                }
+                else
+                {
+                    // forse spawn on the right side
+                    totalRight.Add(c);
+                }
+            }
+
+            float deltaLeft = xExtent / totalLeft.Count();
+
+            // offset from left border
+            float spawnDeltaLeft = 2;
+            // spawn evenly distributed left
+            for (int i = 0; i < totalLeft.Count(); i++)
+            {
+                var c = totalLeft[i];
+
+                // offset from right border
+                if (i == totalLeft.Count() - 1)
+                {
+                    spawnDeltaLeft -= 2;
+                }
+                // to keep balance
+                Vector3 spawnPosition = new Vector3(
+                    start + spawnDeltaLeft,
+                    // offset y a bit
+                    bounds.max.y,
+                    0f
+                );
+                var emitter = Instantiate<Emitter>(
+                    emitterPrefab,
+                    spawnPosition,
+                    Quaternion.identity
+                );
+
+                int repetitions = c - '0';
+                emitter.SetRepititions(repetitions);
+                emitters.Add(emitter.gameObject);
+                leftEmitters.Add(emitter.gameObject);
+                float emitterHalfHeight = emitter.GetComponent<Collider2D>().bounds.extents.y / 2;
+                emitter.transform.Translate(0, emitterHalfHeight + 0.5f, 0);
+
+                spawnDeltaLeft += deltaLeft;
+            }
+
+            float deltaRight = xExtent / totalRight.Count();
+            // offset from border
+            float spawnDeltaRight = 2 + xExtent;
+            // spawn evenly distributed left
+            for (int i = 0; i < totalRight.Count(); i++)
+            {
+                var c = totalRight[i];
+
+                // offset from right border
+                if (i == totalRight.Count() - 1)
+                {
+                    spawnDeltaRight -= 2;
+                }
+                // to keep balance
+                Vector3 spawnPosition = new Vector3(
+                    start + spawnDeltaRight,
+                    bounds.max.y,
+                    0f
+                );
+                var emitter = Instantiate<Emitter>(
+                    emitterPrefab,
+                    spawnPosition,
+                    Quaternion.identity
+                );
+
+                int repetitions = c - '0';
+                emitter.SetRepititions(repetitions);
+                emitters.Add(emitter.gameObject);
+                rightEmitters.Add(emitter.gameObject);
+                float emitterHalfHeight = emitter.GetComponent<Collider2D>().bounds.extents.y / 2;
+                // offset y
+                emitter.transform.Translate(0, emitterHalfHeight + 0.5f, 0);
+
+                spawnDeltaRight += deltaRight;
+            }
+        }
+        else
         {
             Debug.LogError("Not found Ground GameObject with tag 'Ground'. Add tag to detect Emitter spawn area.");
-            return;
-        }
-
-        var groundCollider = ground.GetComponent<Collider2D>();
-        if (groundCollider == null)
-        {
-            Debug.LogError("Ground GameObject has no Collider2D.");
-            return;
-        }
-
-        // don't fly away
-        Rigidbody2D rb = ground.GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.constraints |= RigidbodyConstraints2D.FreezePositionY;
-        }
-
-        Bounds bounds = groundCollider.bounds;
-
-        var leftSlots = new List<float>();
-        var rightSlots = new List<float>();
-        const int emitterExtent = 2;
-
-        float start = bounds.min.x + 1;
-        float xExtent = bounds.extents.x; // half size
-
-        for (float i = 0; i < xExtent; i += emitterExtent)
-        {
-            leftSlots.Add(i);
-            rightSlots.Add(i);
-        }
-
-        int totalLeft = 0;
-        const float deltaY = 0.5f;
-
-        foreach (char c in distribution)
-        {
-            int repetitions = c - '0';
-
-            if (leftSlots.Count == 0 && rightSlots.Count == 0)
-            {
-                Debug.LogError("More emitters requested than available slots. Stopping spawn.");
-                break;
-            }
-
-            bool wantLeft = prng.NextBool() && totalLeft < distribution.Length / 2;
-            bool leftAvailable = leftSlots.Count > 0;
-            bool rightAvailable = rightSlots.Count > 0;
-
-            // Use the preferred side, falling back to the other if it has no free slots.
-            bool isChoiceLeft = (wantLeft && leftAvailable) || !rightAvailable;
-
-            float deltaX;
-            if (isChoiceLeft)
-            {
-                int r = prng.NextInt(0, leftSlots.Count); // upper bound is exclusive
-                deltaX = leftSlots[r];
-                leftSlots.RemoveAt(r);
-                totalLeft++;
-            }
-            else
-            {
-                int r = prng.NextInt(0, rightSlots.Count);
-                deltaX = xExtent + rightSlots[r];
-                rightSlots.RemoveAt(r);
-            }
-
-            Vector3 spawnPosition = new Vector3(
-                start + deltaX,
-                bounds.max.y + deltaY,
-                0f
-            );
-
-            Emitter emitter = Instantiate(emitterPrefab, spawnPosition, Quaternion.identity);
-            emitter.SetRepititions(repetitions);
-
-            emitters.Add(emitter.gameObject);
-            if (isChoiceLeft)
-                leftEmitters.Add(emitter.gameObject);
-            else
-                rightEmitters.Add(emitter.gameObject);
-
-            float emitterHalfHeight = emitter.GetComponent<Collider2D>().bounds.extents.y / 2;
-            emitter.transform.Translate(0, emitterHalfHeight, 0);
         }
     }
 
