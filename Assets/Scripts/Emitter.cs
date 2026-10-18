@@ -58,6 +58,7 @@ public class Emitter : MonoBehaviour
         for (int count = 0; count < repetitions; ++count)
             GameManager.Instance.Enqueue(currentTone);
         AudioManager.Instance.PlaySuccessClip();
+        Destroy(this.gameObject);
     }
 
     
