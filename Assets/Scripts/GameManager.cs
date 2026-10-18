@@ -73,19 +73,27 @@ public class GameManager : MonoBehaviour
     public void LoadLevel(UnityEngine.SceneManagement.Scene scene)
     {
         //SceneManager.LoadScene("Levels/" + levelId);
-        string path = Path.Combine(
-            Application.dataPath,
-            $"Levels/{scene.name}/answer.txt"
-        );
+        TextAsset file = Resources.Load<TextAsset>($"{scene.name}");
         List<string> answerConfig = null;
         string answer = null;
         string distribution = null;
-        if (File.Exists(path))
+
+        if (file != null)
         {
-            answerConfig = File.ReadLines(path).ToList();
+            var lines = file.text.Split(
+                new[] { "\r\n", "\n", "\r" },
+                StringSplitOptions.None
+            ).ToList();
+
+            foreach (string line in lines)
+            {
+                Debug.Log(line);
+            }
+
+            answerConfig = lines;
             if (answerConfig.Count != 2)
             {
-                Debug.LogError($"Expected 2 lines file: {path}");
+                Debug.LogError($"Expected 2 lines file: {scene.name}");
             } else
             {
                 answer = answerConfig[0];
@@ -95,7 +103,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"CSV not found: {path}");
+            Debug.LogError($"{scene.name} textfile with pattern / answer not found");
         }
         GameObject obj = GameObject.FindWithTag("Ground");
 
@@ -157,7 +165,7 @@ public class GameManager : MonoBehaviour
                 var isLeft = prng.NextBool();
                 float deltaY = 0.5f;
                 float deltaX = 2;
-                bool isChoiceLeft = totalLeft < distribution.Length / 2 && isLeft;
+                bool isChoiceLeft = (totalLeft < distribution.Length / 2) && isLeft;
                 if (isChoiceLeft)
                 {
                     // forse spawn on the right side
@@ -212,7 +220,7 @@ public class GameManager : MonoBehaviour
 
             //var pos = transform.position;
             //pos.y ;
-            //var leftCast = Physics2D.Raycast(transform.Translate(0, 1, 0).transform.position, Vector2.left);
+            //var leftCast = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y), Vector2.left);
             //var rightCast = Physics2D.Raycast(transform.position, Vector2.right);
             //var leftO = leftCast.collider.gameObject;
             //var rightO = rightCast.collider.gameObject;
