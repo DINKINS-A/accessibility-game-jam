@@ -22,6 +22,8 @@ public class GameManager : MonoBehaviour
 
     //private Dictionary<int, AudioSource> toneAudioMap;
 
+    private bool playersWon = false;
+
     [SerializeField] public Emitter emitterPrefab;
 
     public static GameManager Instance { get; private set; }
@@ -48,6 +50,14 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+    }
+
+    private void Update()
+    {
+        if (Game.Instance.CheckWin())
+            playersWon = true;
+        else
+            playersWon = false;
     }
 
 
@@ -247,5 +257,10 @@ public class GameManager : MonoBehaviour
     public void Reset()
     {
         Game.Instance.ResetAnswer();
+    }
+
+    public bool PlayerWin()
+    {
+        return playersWon;
     }
 }
