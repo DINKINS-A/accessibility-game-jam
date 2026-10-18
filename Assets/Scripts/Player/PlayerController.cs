@@ -4,6 +4,7 @@ using Unity.AppUI.Editor;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
 
 public class PlayerController : MonoBehaviour
 {
@@ -41,6 +42,7 @@ public class PlayerController : MonoBehaviour
     private InputAction leftTriggerAction;
     private InputAction rightTriggerAction;
     public Rigidbody2D rb2D;
+    private bool leftPlayer = true;
 
     private void Awake()
     {
@@ -59,9 +61,9 @@ public class PlayerController : MonoBehaviour
         leftTriggerAction = playerMap.FindAction("Left Trigger", true);
         rightTriggerAction = playerMap.FindAction("Right Trigger", true);
         leftShoulderAction.performed +=
-                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
+                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device);
         rightShoulderAction.performed +=
-            context => VibratePerRepititions(context.control.device.name);
+            context => VibratePerRepititions(context.control.device);
         southAction.performed +=
                 context => SetActiveEmitter(TONE.CROSS);
         westAction.performed +=
@@ -74,6 +76,7 @@ public class PlayerController : MonoBehaviour
             context => GameManager.Instance.ListenToSubmission();
         rightTriggerAction.performed +=
             context => GameManager.Instance.Test();
+
     }
 
     public void SetTouchingEmitter(Emitter e)
@@ -99,22 +102,24 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private async void VibratePerRepititions(string name)
+    private async void VibratePerRepititions(InputDevice device)
     {
         if (touchingEmitter)
         {
             for (int count = 0; count < touchingEmitter.GetRepititions(); count++)
             {
-                GamepadTarget target = name.Equals("DualSenseGamepadHID") ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
+                int index = Gamepad.all.IndexOfReference((Gamepad)device);
+                GamepadTarget target = index == 0 ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
                 HapticsManager.Instance.Rumble(Motor.Left, EMITTER_PULSE_DURATION_SECONDS, target);
                 await Task.Delay(Convert.ToInt32(RUMBLE_PULSE_INTERVAL_SECONDS * 1000));
             }
         }
     }
 
-    private void VibrateLeftOrRight(GameObject o, string name)
+    private void VibrateLeftOrRight(GameObject o, InputDevice device)
     {
-        GamepadTarget target = name.Equals("DualSenseGamepadHID") ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
+        int index = Gamepad.all.IndexOfReference((Gamepad)device);
+        GamepadTarget target = index == 0 ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
         if (transform.position.x > o.transform.position.x)
         {
             Debug.Log("left");

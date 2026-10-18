@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -25,6 +27,7 @@ public class Emitter : MonoBehaviour
         playerController = collision.GetComponent<PlayerController>();
         playerController.SetTouchingEmitter(this);
         AudioManager.Instance.PlayEmitterLocatedClip();
+        EmitterLocated(playerController);
         Debug.Log("set touching emitter");
     }
 
@@ -80,11 +83,13 @@ public class Emitter : MonoBehaviour
     /*
      * Called when the player interacts with this emitter
      */
-    void TriggerRepitionPulse()
+    private async void EmitterLocated(PlayerController controller)
     {
-        for (int count = 0; count < repetitions; count++)
+        for (int count = 0; count < 5; count++)
         {
-            //HapticsManager.Instance.Rumble();
+            GamepadTarget target = name.Equals("DualSenseGamepadHID") ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
+            HapticsManager.Instance.Rumble(Motor.Left, 0.025f, target);
+            await Task.Delay(500);
         }
     }
 }
