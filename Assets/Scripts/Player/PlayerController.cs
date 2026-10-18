@@ -43,10 +43,6 @@ public class PlayerController : MonoBehaviour
         InputActionMap playerMap = inputActions.FindActionMap("Player", true);
         leftAction = playerMap.FindAction("Left", true);
         rightAction = playerMap.FindAction("Right", true);
-        northAction = playerMap.FindAction("North Button", true);
-        eastAction = playerMap.FindAction("East Button", true);
-        southAction = playerMap.FindAction("South Button", true);
-        westAction = playerMap.FindAction("West Button", true);
         leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
         rightShoulderAction = playerMap.FindAction("Right Shoulder", true);
         leftShoulderAction.performed +=
@@ -62,7 +58,6 @@ public class PlayerController : MonoBehaviour
 
         //rightShoulderAction.performed +=
         //    context => TryAssignNote(GameManager.Instance.getNearestEmitter(transform));
-    }
 
     public void SetTouchingEmitter(Emitter e)
     {
@@ -83,18 +78,27 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("No touching emitter found.");
         }
+        northAction = playerMap.FindAction("North", true);
+        eastAction = playerMap.FindAction("East", true);
+        southAction = playerMap.FindAction("South", true);
+        westAction = playerMap.FindAction("West", true);
+        leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
+        leftShoulderAction.performed +=
+                context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
+
     }
 
-    private void VibrateLeftOrRight(GameObject o)
+    private void VibrateLeftOrRight(GameObject o, string name)
     {
+        GamepadTarget target = name.Equals("DualSenseGamepadHID") ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
         if (transform.position.x > o.transform.position.x)
         {
             Debug.Log("left");
-            HapticsManager.Instance.Rumble(Motor.Left, RUMBLE_DURATION_SECONDS);
+            HapticsManager.Instance.Rumble(Motor.Left, RUMBLE_DURATION_SECONDS, target);
         } else
         {
             Debug.Log("right");
-            HapticsManager.Instance.Rumble(Motor.Right, RUMBLE_DURATION_SECONDS);
+            HapticsManager.Instance.Rumble(Motor.Right, RUMBLE_DURATION_SECONDS, target);
         }
     }
 
