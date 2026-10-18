@@ -5,14 +5,18 @@ using UnityEngine.Events;
 public class Emitter : MonoBehaviour
 {
     private TONE currentTone;
-    private short repititions;
+    private int repetitions;
     private int playerID;
     private PlayerController playerController;
+
+    private void Awake()
+    {
+        repetitions = 0;
+    }
+
     void Start()
     {
         currentTone = TONE.NONE;
-        repititions = 0;
-        //gameObject.SendMessage("Enqueue", 5.0);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -42,11 +46,13 @@ public class Emitter : MonoBehaviour
     {
         if (this.currentTone != TONE.NONE)
         {
-            AudioManager.Instance.PlayClip(AudioManager.Instance.GetFailClip());
+            AudioManager.Instance.PlayFailClip();
             return;
         }
         this.currentTone = currentTone;
-        AudioManager.Instance.PlayClip(AudioManager.Instance.GetSuccessClip());
+        for (int count = 0; count < repetitions; ++count)
+            GameManager.Instance.Enqueue(currentTone);
+        AudioManager.Instance.PlaySuccessClip();
     }
 
     
@@ -55,19 +61,19 @@ public class Emitter : MonoBehaviour
     }
 
     /*
- * Set the number of times this emitter will play a sound
+ * Get the number of times this emitter will play a sound
  */
-    public void GetRepititions(short repititions)
+    public int GetRepititions()
     {
-        this.repititions = repititions;
+        return repetitions;
     }
 
     /*
      * Set the number of times this emitter will play a sound
      */
-    public void SetRepititions(short repititions)
+    public void SetRepititions(int repetitions)
     {
-        this.repititions = repititions;
+        this.repetitions = repetitions;
     }
 
     /*
@@ -75,9 +81,9 @@ public class Emitter : MonoBehaviour
      */
     void TriggerRepitionPulse()
     {
-        for (int count = 0; count < repititions; count++)
+        for (int count = 0; count < repetitions; count++)
         {
-            //HapticsManager.Instance.Pulse(10, 10, 1);
+            //HapticsManager.Instance.Rumble();
         }
     }
 }

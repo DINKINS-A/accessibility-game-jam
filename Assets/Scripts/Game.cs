@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -14,27 +15,42 @@ public enum TONE
 
 public class Game : MonoBehaviour
 {
+
     /*
      * Private Attributes
      */
-    private Queue<TONE> solution;
+    private Queue<TONE> submission;
     private Queue<TONE> answer;
+    private const int TONE_INTERVAL = 500;
 
 
     /*
      * Public Attributes
      */
-    public AudioSource audioSource;
     public AudioClip triangleTone;
     public AudioClip squareTone;
     public AudioClip circleTone;
     public AudioClip crossTone;
 
+    public static Game Instance {  get; private set; }
+
+    void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        submission = new Queue<TONE>();
+        answer = new Queue<TONE>();
+        DontDestroyOnLoad(gameObject);
+    }
+
 
     void Start()
     {
-        solution = new Queue<TONE>();
-        answer = new Queue<TONE>();
+        
     }
 
     public void SetAnswer(Queue<TONE> answer)
@@ -49,16 +65,16 @@ public class Game : MonoBehaviour
             switch (c)
             {
                 case 'A':
-                    res.Append(TONE.CROSS);
+                    res.Enqueue(TONE.CROSS);
                     break;
                 case 'B':
-                    res.Append(TONE.CIRCLE);
+                    res.Enqueue(TONE.CIRCLE);
                     break;
                 case 'C':
-                    res.Append(TONE.TRIANGLE);
+                    res.Enqueue(TONE.TRIANGLE);
                     break;
                 case 'D':
-                    res.Append(TONE.SQUARE);
+                    res.Enqueue(TONE.SQUARE);
                     break;
                 default:
                     break;
@@ -69,63 +85,35 @@ public class Game : MonoBehaviour
 
     public void Enqueue(TONE tone)
     {
-        answer.Enqueue(tone);
+        submission.Enqueue(tone);
     }
 
     /*
-     * Compares the answer to the solution
+     * Compares the answer to the submission
      * Players the answer back to the players
      * The full song will play if they solve the puzzle
      */
-    public void CheckAnswer()
+    public async void CheckAnswer()
     {
         // Iterate over answer queue and play each tone using the audio manager
         foreach (var tone in answer)
         {
-            switch (tone)
-            {
-                case TONE.TRIANGLE:
-                    audioSource.PlayOneShot(triangleTone);
-                    break;
-                case TONE.CIRCLE:
-                    audioSource.PlayOneShot(circleTone);
-                    break;
-                case TONE.CROSS:
-                    audioSource.PlayOneShot(crossTone);
-                    break;
-                case TONE.SQUARE:
-                    audioSource.PlayOneShot(squareTone);
-                    break;
-                default:
-                    break;
-            }
+            Debug.Log(tone);
+            AudioManager.Instance.PlayTone(tone);
+            await Task.Delay(TONE_INTERVAL);
         }
     }
 
     /*
-     * Plays the solution for the players
+     * Plays the submission for the players
      * Happens by default at the beginning of the level
      */
-    public void PlaySolution()
+    public async void PlaySubmission()
     {
         // Iterate over answer queue and play each tone using the audio manager
-        foreach (var tone in solution) {
-            switch (tone) {
-                case TONE.TRIANGLE:
-                    audioSource.PlayOneShot(triangleTone);
-                    break;
-                case TONE.CIRCLE:
-                    audioSource.PlayOneShot(circleTone);
-                    break;
-                case TONE.CROSS:
-                    audioSource.PlayOneShot(crossTone);
-                    break;
-                case TONE.SQUARE:
-                    audioSource.PlayOneShot(squareTone);
-                    break;
-                default:
-                    break;
-            }
+        foreach (var tone in submission) {
+            AudioManager.Instance.PlayTone(tone);
+            await Task.Delay(TONE_INTERVAL);
         }
     }
 
@@ -134,6 +122,6 @@ public class Game : MonoBehaviour
      */
     public void ResetAnswer()
     {
-        answer.Clear();
+        submission.Clear();
     }
 }

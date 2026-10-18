@@ -34,6 +34,8 @@ public class PlayerController : MonoBehaviour
     private InputAction westAction;
     private InputAction leftShoulderAction;
     private InputAction rightShoulderAction;
+    private InputAction leftTriggerAction;
+    private InputAction rightTriggerAction;
     public Rigidbody2D rb2D;
 
     private void Awake()
@@ -50,6 +52,8 @@ public class PlayerController : MonoBehaviour
         westAction = playerMap.FindAction("West", true);
         leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
         rightShoulderAction = playerMap.FindAction("Right Shoulder", true);
+        leftTriggerAction = playerMap.FindAction("Left Trigger", true);
+        rightTriggerAction = playerMap.FindAction("Right Trigger", true);
         leftShoulderAction.performed +=
                 context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
         southAction.performed +=
@@ -60,10 +64,11 @@ public class PlayerController : MonoBehaviour
                 context => SetActiveEmitter(TONE.CIRCLE);
         northAction.performed +=
                 context => SetActiveEmitter(TONE.TRIANGLE);
+        leftTriggerAction.performed +=
+            context => GameManager.Instance.ListenToSubmission();
+        rightTriggerAction.performed +=
+            context => GameManager.Instance.Test();
     }
-
-        //rightShoulderAction.performed +=
-        //    context => TryAssignNote(GameManager.Instance.getNearestEmitter(transform));
 
     public void SetTouchingEmitter(Emitter e)
     {
@@ -161,8 +166,8 @@ public class PlayerController : MonoBehaviour
     {
        if(collision.gameObject.CompareTag("walls") || collision.gameObject.CompareTag("middle_wall"))
         {
-            
-            UniversalAudioSource.PlayOneShot(AudioManager.Instance.GetWallsClip());
+
+            AudioManager.Instance.PlayWallsClip();
         }
     }
 
