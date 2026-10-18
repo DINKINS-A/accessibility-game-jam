@@ -1713,7 +1713,7 @@ GameObject:
   - component: {fileID: 562924811}
   m_Layer: 0
   m_Name: Divider
-  m_TagString: walls
+  m_TagString: middle_wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2791,6 +2791,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4e4fd4c97e139645ac5e7897ef9bdca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  touchingEmitter: {fileID: 0}
   UniversalAudioSource: {fileID: 668061092}
   inputActionsAsset: {fileID: -944628639613478452, guid: 5c21643ed33d09d4983eb7ba2ad51e0d, type: 3}
   controlDevice: 2
@@ -5468,6 +5469,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4e4fd4c97e139645ac5e7897ef9bdca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  touchingEmitter: {fileID: 0}
   UniversalAudioSource: {fileID: 668061092}
   inputActionsAsset: {fileID: -944628639613478452, guid: 5c21643ed33d09d4983eb7ba2ad51e0d, type: 3}
   controlDevice: 1
@@ -5769,6 +5771,8 @@ MonoBehaviour:
   loseClip: {fileID: 8300000, guid: c75e8b6389d368d44bb0a203ed9f86f4, type: 3}
   failClip: {fileID: 8300000, guid: 606a108f6261aa94e8cb6a0c6faa61c9, type: 3}
   successClip: {fileID: 8300000, guid: 0d444ecd1c64c0b41ad67ab8e5884eef, type: 3}
+  emitterLocatedClip: {fileID: 0}
+  audioSource: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

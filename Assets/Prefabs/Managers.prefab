@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2142287528629407334
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7641576115797449276}
+  - component: {fileID: 6394589191349683762}
+  - component: {fileID: 6507801712304983265}
+  - component: {fileID: 6570285129001093122}
+  m_Layer: 0
+  m_Name: Managers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7641576115797449276
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142287528629407334}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.91501, y: 0.20578, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6394589191349683762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142287528629407334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24d2be82f824ef946bc6653dbcf874e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  emitterPrefab: {fileID: 6507964735003306200, guid: 966e5048259439b44aa83283fc4098ec, type: 3}
+--- !u!114 &6507801712304983265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142287528629407334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e3ef6b8f22c4e649942563ff8a8908a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CountdownTimer
+  duration: 60
+  startOnAwake: 1
+  useUnscaledTime: 0
+  label: {fileID: 0}
+--- !u!114 &6570285129001093122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142287528629407334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1988061f023b604e89860b381ec79e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  northTone: {fileID: 8300000, guid: 11911f4637453ad408e4dc73c7fbbabd, type: 3}
+  southTone: {fileID: 8300000, guid: d82d8ea0abc3309408ed5739b3154795, type: 3}
+  eastTone: {fileID: 8300000, guid: 6e99a107e1d0b084c9604417855eb128, type: 3}
+  westTone: {fileID: 8300000, guid: ce48852cacb6bcc449210da162d8e19b, type: 3}
+  wallsClip: {fileID: 8300000, guid: 401c689ca0f35b546a09a2e4ee23772e, type: 3}
+  winClip: {fileID: 8300000, guid: 2a2930abea58aad4591e3ce02e08cc4d, type: 3}
+  loseClip: {fileID: 8300000, guid: c75e8b6389d368d44bb0a203ed9f86f4, type: 3}
+  failClip: {fileID: 8300000, guid: 606a108f6261aa94e8cb6a0c6faa61c9, type: 3}
+  successClip: {fileID: 8300000, guid: 0d444ecd1c64c0b41ad67ab8e5884eef, type: 3}
+  emitterLocatedClip: {fileID: 8300000, guid: 61404feb142a218449891e64f6db5005, type: 3}
+  audioSource: {fileID: 4799020006747472164, guid: 317861cb8236d3c4ab6b498c6e6eb50f, type: 3}
