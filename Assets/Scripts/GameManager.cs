@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    Game game;
 
     Unity.Mathematics.Random prng = new Unity.Mathematics.Random((uint)DateTime.Now.Second);
 
@@ -39,26 +38,22 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
-        game = new Game();
         emitters = new List<GameObject>();
 
         leftEmitters = new List<GameObject>();
 
         rightEmitters = new List<GameObject>();
-        //toneAudioMap = new Dictionary<int, AudioSource>();
-
-        //foreach (ToneMapping mapping in toneMappings)
-        //{
-        //    if (mapping.audioSource != null)
-        //        toneAudioMap[mapping.toneId] = mapping.audioSource;
-        //}
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
     }
 
 
     public void Enqueue(TONE tone)
     {
-        game.Enqueue(tone);
+        Game.Instance.Enqueue(tone);
     }
     void OnEnable()
     {
@@ -109,7 +104,7 @@ public class GameManager : MonoBehaviour
         if (answerConfig != null && distribution != null)
         {
             var pattern = answerConfig[0];
-            game.SetAnswer(game.ParseAnswerLine(pattern));
+            Game.Instance.SetAnswer(Game.Instance.ParseAnswerLine(pattern));
 
             totalEmitters = distribution.Length;
         }
@@ -185,7 +180,7 @@ public class GameManager : MonoBehaviour
                     spawnPosition,
                     Quaternion.identity
                 );
-                emitter.SetRepititions((short)repetitions);
+                emitter.SetRepititions(repetitions);
                 emitters.Add(emitter.gameObject);
                 if (isChoiceLeft)
                 {
@@ -234,11 +229,15 @@ public class GameManager : MonoBehaviour
 
     public void Test()
     {
-        game.CheckAnswer();
+        Game.Instance.CheckAnswer();
+    }
+
+    public void ListenToSubmission() { 
+        Game.Instance.PlaySubmission();
     }
 
     public void Reset()
     {
-        game.ResetAnswer();
+        Game.Instance.ResetAnswer();
     }
 }

@@ -64,10 +64,11 @@ public class PlayerController : MonoBehaviour
                 context => SetActiveEmitter(TONE.CIRCLE);
         northAction.performed +=
                 context => SetActiveEmitter(TONE.TRIANGLE);
+        leftTriggerAction.performed +=
+            context => GameManager.Instance.ListenToSubmission();
+        rightTriggerAction.performed +=
+            context => GameManager.Instance.Test();
     }
-
-        //rightShoulderAction.performed +=
-        //    context => TryAssignNote(GameManager.Instance.getNearestEmitter(transform));
 
     public void SetTouchingEmitter(Emitter e)
     {
