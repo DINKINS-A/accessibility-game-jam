@@ -9,7 +9,7 @@ public class UIManager : MonoBehaviour
 
     // Main menu references
     GameObject MainMenu, OptionsMenu;
-    Button Play, Options, Exit, OptionsBack;
+    Button Play, Level1, Level2, Level3, Level4, Level5, Level6, Level7, Options, Exit, OptionsBack;
 
     // Pause menu references
     GameObject PauseMenu, PauseOptionsMenu;
@@ -43,11 +43,32 @@ public class UIManager : MonoBehaviour
             MainMenu = GetObj(root, "MainMenu");
             OptionsMenu = GetObj(root, "OptionsMenu");
             Play = Get<Button>(root, "PlayButton");
+            Level1 = Get<Button>(root, "Level1");
+
+            Level2 = Get<Button>(root, "Level2");
+
+            Level3 = Get<Button>(root, "Level3");
+
+            Level4 = Get<Button>(root, "Level4");
+
+            Level5 = Get<Button>(root, "Level5");
+
+            Level6 = Get<Button>(root, "Level6");
+
+            Level7 = Get<Button>(root, "Level7");
             Options = Get<Button>(root, "OptionsButton");
             Exit = Get<Button>(root, "ExitButton");
             OptionsBack = Get<Button>(root, "BackButton");
 
             Bind(Play, OnPlayButtonClicked);
+            Bind(Level1, () => SceneManager.LoadScene("Level1"));
+            Bind(Level2, () => SceneManager.LoadScene("Level2"));
+            Bind(Level3, () => SceneManager.LoadScene("Level3"));
+            Bind(Level4, () => SceneManager.LoadScene("Level4"));
+            Bind(Level5, () => SceneManager.LoadScene("Level5"));
+            Bind(Level6, () => SceneManager.LoadScene("Level6"));
+            Bind(Level7, () => SceneManager.LoadScene("Level7"));
+
             Bind(Options, OnOptionsButtonClicked);
             Bind(Exit, OnExitButtonClicked);
             Bind(OptionsBack, OnOptionBackButtonClicked);
