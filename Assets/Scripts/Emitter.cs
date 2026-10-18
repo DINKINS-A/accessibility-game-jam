@@ -28,7 +28,12 @@ public class Emitter : MonoBehaviour
         playerController = collision.GetComponent<PlayerController>();
         playerController.SetTouchingEmitter(this);
         AudioManager.Instance.PlayEmitterLocatedClip();
-        EmitterLocated(playerController);
+        var player1 = GameObject.Find("Player 1");
+        var player2 = GameObject.Find("Player 2");
+        if (collision.gameObject.Equals(player1))
+            EmitterLocated(playerController, GamepadTarget.Gamepad1);
+        else if (collision.gameObject.Equals(player2))
+            EmitterLocated(playerController, GamepadTarget.Gamepad2);
         Debug.Log("set touching emitter");
     }
 
@@ -58,6 +63,7 @@ public class Emitter : MonoBehaviour
         for (int count = 0; count < repetitions; ++count)
             GameManager.Instance.Enqueue(currentTone);
         AudioManager.Instance.PlaySuccessClip();
+        Destroy(this.gameObject);
     }
 
     
@@ -84,12 +90,10 @@ public class Emitter : MonoBehaviour
     /*
      * Called when the player interacts with this emitter
      */
-    private async void EmitterLocated(PlayerController controller)
+    private async void EmitterLocated(PlayerController controller, GamepadTarget target)
     {
         for (int count = 0; count < 5; count++)
         {
-            int index = 0;// Gamepad.all.IndexOfReference((Gamepad)device);
-            GamepadTarget target = index == 0 ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
             HapticsManager.Instance.Rumble(Motor.Left, 0.025f, target);
             await Task.Delay(500);
         }
