@@ -122,10 +122,8 @@ public class GameManager : MonoBehaviour
         rightEmitters.Clear();
     }
 
-    public void LoadLevel(Scene scene)
+    public void LoadLevel(UnityEngine.SceneManagement.Scene scene)
     {
-        // The previous scene's emitters are already destroyed. Drop the stale references.
-        ClearEmitters();
         //SceneManager.LoadScene("Levels/" + levelId);
         TextAsset file = Resources.Load<TextAsset>($"{scene.name}");
         List<string> answerConfig = null;
@@ -160,6 +158,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError($"{scene.name} textfile with pattern / answer not found");
         }
+        GameObject obj = GameObject.FindWithTag("Ground");
 
         int totalEmitters = 0;
 
@@ -172,19 +171,19 @@ public class GameManager : MonoBehaviour
         }
 
 
-        var groundCollider = ground.GetComponent<Collider2D>();
-        if (groundCollider == null)
+        if (obj != null)
         {
-            Debug.LogError("Ground GameObject has no Collider2D.");
-            return;
-        }
+            var emitterCollider = obj.GetComponent<Collider2D>();
+            // dont fly away
+            Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.constraints |= RigidbodyConstraints2D.FreezePositionY;
+            }
+            Bounds bounds = emitterCollider.bounds;
 
-        // don't fly away
-        Rigidbody2D rb = ground.GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.constraints |= RigidbodyConstraints2D.FreezePositionY;
-        }
+            float leftBound = bounds.min.x;
+            float rightBound = bounds.max.x;
 
 
             float start = bounds.min.x + 1;
@@ -215,7 +214,7 @@ public class GameManager : MonoBehaviour
             float deltaLeft = xExtent / totalLeft.Count();
 
             // offset from left border
-            float spawnDeltaLeft = 2; 
+            float spawnDeltaLeft = 2;
             // spawn evenly distributed left
             for (int i = 0; i < totalLeft.Count(); i++)
             {
@@ -286,7 +285,7 @@ public class GameManager : MonoBehaviour
             }
         }
         else
-        {   
+        {
             Debug.LogError("Not found Ground GameObject with tag 'Ground'. Add tag to detect Emitter spawn area.");
         }
     }
