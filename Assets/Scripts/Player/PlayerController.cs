@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Unity.AppUI.Editor;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -14,6 +16,8 @@ public class PlayerController : MonoBehaviour
 
     public Emitter? touchingEmitter;
     public const float RUMBLE_DURATION_SECONDS = 1f;
+    public const float RUMBLE_PULSE_INTERVAL_SECONDS = 0.5f;
+    public const float EMITTER_PULSE_DURATION_SECONDS = 0.025f;
     public AudioSource UniversalAudioSource;
     [Header("Input")]
     [Tooltip("Drag your PlayerInput.inputactions asset here (same asset on both players)")]
@@ -56,6 +60,8 @@ public class PlayerController : MonoBehaviour
         rightTriggerAction = playerMap.FindAction("Right Trigger", true);
         leftShoulderAction.performed +=
                 context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
+        rightShoulderAction.performed +=
+            context => VibratePerRepititions(context.control.device.name);
         southAction.performed +=
                 context => SetActiveEmitter(TONE.CROSS);
         westAction.performed +=
@@ -93,7 +99,18 @@ public class PlayerController : MonoBehaviour
 
     }
 
-
+    private async void VibratePerRepititions(string name)
+    {
+        if (touchingEmitter)
+        {
+            for (int count = 0; count < touchingEmitter.GetRepititions(); count++)
+            {
+                GamepadTarget target = name.Equals("DualSenseGamepadHID") ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
+                HapticsManager.Instance.Rumble(Motor.Left, EMITTER_PULSE_DURATION_SECONDS, target);
+                await Task.Delay(Convert.ToInt32(RUMBLE_PULSE_INTERVAL_SECONDS * 1000));
+            }
+        }
+    }
 
     private void VibrateLeftOrRight(GameObject o, string name)
     {
