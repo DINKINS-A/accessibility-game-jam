@@ -2,33 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    // Seed must be non-zero for Unity.Mathematics.Random.
+    private Unity.Mathematics.Random prng = new Unity.Mathematics.Random(MakeSeed());
 
-    Unity.Mathematics.Random prng = new Unity.Mathematics.Random((uint)DateTime.Now.Second);
-
-    //[System.Serializable]
-    //public class ToneMapping
-    //{
-    //    public int toneId;
-    //    public AudioSource audioSource;
-    //}
-
-    //[SerializeField] private ToneMapping[] toneMappings;
-
-    //private Dictionary<int, AudioSource> toneAudioMap;
+    private static uint MakeSeed()
+    {
+        uint seed = (uint)Environment.TickCount;
+        return seed == 0 ? 1u : seed;
+    }
 
     [SerializeField] public Emitter emitterPrefab;
 
     public static GameManager Instance { get; private set; }
 
-    List<GameObject> emitters;
-    List<GameObject> leftEmitters;
-    List<GameObject> rightEmitters;
+    // Initialised inline so they are never null, even on a duplicate instance
+    // that is about to be destroyed.
+    private readonly List<GameObject> emitters = new List<GameObject>();
+    private readonly List<GameObject> leftEmitters = new List<GameObject>();
+    private readonly List<GameObject> rightEmitters = new List<GameObject>();
 
     void Awake()
     {
@@ -38,23 +34,9 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
-        emitters = new List<GameObject>();
-
-        leftEmitters = new List<GameObject>();
-
-        rightEmitters = new List<GameObject>();
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Start()
-    {
-    }
-
-
-    public void Enqueue(TONE tone)
-    {
-        Game.Instance.Enqueue(tone);
-    }
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -65,166 +47,184 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode mode)
+    void OnDestroy()
     {
+        if (Instance == this) Instance = null;
+    }
+
+    public void Enqueue(TONE tone)
+    {
+        Game.Instance.Enqueue(tone);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Ignore duplicate instances that are being destroyed.
+        if (Instance != this) return;
         LoadLevel(scene);
     }
 
-    public void LoadLevel(UnityEngine.SceneManagement.Scene scene)
+    private void ClearEmitters()
     {
-        //SceneManager.LoadScene("Levels/" + levelId);
+        emitters.Clear();
+        leftEmitters.Clear();
+        rightEmitters.Clear();
+    }
+
+    public void LoadLevel(Scene scene)
+    {
+        // The previous scene's emitters are already destroyed. Drop the stale references.
+        ClearEmitters();
+
         string path = Path.Combine(
             Application.dataPath,
             $"Levels/{scene.name}/answer.txt"
         );
-        List<string> answerConfig = null;
-        string answer = null;
-        string distribution = null;
-        if (File.Exists(path))
-        {
-            answerConfig = File.ReadLines(path).ToList();
-            if (answerConfig.Count != 2)
-            {
-                Debug.LogError($"Expected 2 lines file: {path}");
-            } else
-            {
-                answer = answerConfig[0];
-                distribution = answerConfig[1];
-            }
-            Debug.Log(answerConfig);
-        }
-        else
-        {
-            Debug.LogError($"CSV not found: {path}");
-        }
-        GameObject obj = GameObject.FindWithTag("Ground");
 
-        int totalEmitters = 0;
-
-        if (answerConfig != null && distribution != null)
+        // Scenes without an answer file (e.g. the menu) are not levels.
+        if (!File.Exists(path))
         {
-            var pattern = answerConfig[0];
-            Game.Instance.SetAnswer(Game.Instance.ParseAnswerLine(pattern));
-
-            totalEmitters = distribution.Length;
+            Debug.Log($"No answer file for scene '{scene.name}' ({path}). Skipping level setup.");
+            return;
         }
 
-        var totalLeft = 0;
-        var totalRight = 0;
-
-        if (obj != null)
+        List<string> answerConfig = File.ReadLines(path).ToList();
+        if (answerConfig.Count != 2)
         {
-            var emitterCollider = obj.GetComponent<Collider2D>();
-            // dont fly away
-            Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.constraints |= RigidbodyConstraints2D.FreezePositionY;
-            }
-            Bounds bounds = emitterCollider.bounds;
+            Debug.LogError($"Expected 2 lines in file: {path}");
+            return;
+        }
 
-            float leftBound = bounds.min.x;
-            float rightBound = bounds.max.x;
+        string pattern = answerConfig[0];
+        string distribution = answerConfig[1];
 
-            List<float> leftSlots = new List<float>();
-            List<float> rightSlots = new List<float>();
-            var emitterExtent = 2;
+        Game.Instance.SetAnswer(Game.Instance.ParseAnswerLine(pattern));
 
-
-            float start = bounds.min.x + 1;
-            // half size
-            float xExtent = bounds.extents.x;
-            float xmax = start + xExtent * 2;
-            for (float i = 0; i < xExtent; i += emitterExtent)
-            {
-                leftSlots.Add(i);
-                rightSlots.Add(i);
-            }
-
-            foreach (var c in distribution)
-            {
-                int repetitions = c - '0';
-
-                // to keep balance
-                
-
-                Vector3 spawnPosition = new Vector3(
-                    start,
-                    bounds.max.y,
-                    0f
-                );
-
-                var isLeft = prng.NextBool();
-                float deltaY = 0.5f;
-                float deltaX = 2;
-                bool isChoiceLeft = totalLeft < distribution.Length / 2 && isLeft;
-                if (isChoiceLeft)
-                {
-                    // forse spawn on the right side
-                    var r = prng.NextInt(0, leftSlots.Count - 1);
-                    deltaX = leftSlots[r];
-                    leftSlots.RemoveAt(r);
-                    totalLeft++;
-                } else
-                {
-                    // forse spawn on the left side
-                    var r = prng.NextInt(0, rightSlots.Count - 1);
-                    deltaX = xExtent + rightSlots[r];
-                    rightSlots.RemoveAt(r);
-                    totalRight++;
-                }
-                spawnPosition.y += deltaY;
-                spawnPosition.x += deltaX;
-                var emitter = Instantiate<Emitter>(
-                    emitterPrefab,
-                    spawnPosition,
-                    Quaternion.identity
-                );
-                emitter.SetRepititions(repetitions);
-                emitters.Add(emitter.gameObject);
-                if (isChoiceLeft)
-                {
-                    leftEmitters.Add(emitter.gameObject);
-                }
-                else
-                {
-                    rightEmitters.Add(emitter.gameObject);
-                }
-                float emitterHalfHeight = emitter.GetComponent<Collider2D>().bounds.extents.y / 2;
-                emitter.transform.Translate(0, emitterHalfHeight, 0);
-
-            }
-        } else
-        {   
+        GameObject ground = GameObject.FindWithTag("Ground");
+        if (ground == null)
+        {
             Debug.LogError("Not found Ground GameObject with tag 'Ground'. Add tag to detect Emitter spawn area.");
+            return;
+        }
+
+        var groundCollider = ground.GetComponent<Collider2D>();
+        if (groundCollider == null)
+        {
+            Debug.LogError("Ground GameObject has no Collider2D.");
+            return;
+        }
+
+        // don't fly away
+        Rigidbody2D rb = ground.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.constraints |= RigidbodyConstraints2D.FreezePositionY;
+        }
+
+        Bounds bounds = groundCollider.bounds;
+
+        var leftSlots = new List<float>();
+        var rightSlots = new List<float>();
+        const int emitterExtent = 2;
+
+        float start = bounds.min.x + 1;
+        float xExtent = bounds.extents.x; // half size
+
+        for (float i = 0; i < xExtent; i += emitterExtent)
+        {
+            leftSlots.Add(i);
+            rightSlots.Add(i);
+        }
+
+        int totalLeft = 0;
+        const float deltaY = 0.5f;
+
+        foreach (char c in distribution)
+        {
+            int repetitions = c - '0';
+
+            if (leftSlots.Count == 0 && rightSlots.Count == 0)
+            {
+                Debug.LogError("More emitters requested than available slots. Stopping spawn.");
+                break;
+            }
+
+            bool wantLeft = prng.NextBool() && totalLeft < distribution.Length / 2;
+
+            // Fall back to the other side if the chosen side has no free slots.
+            bool isChoiceLeft = wantLeft ? leftSlots.Count > 0 : rightSlots.Count == 0;
+
+            float deltaX;
+            if (isChoiceLeft)
+            {
+                int r = prng.NextInt(0, leftSlots.Count); // upper bound is exclusive
+                deltaX = leftSlots[r];
+                leftSlots.RemoveAt(r);
+                totalLeft++;
+            }
+            else
+            {
+                int r = prng.NextInt(0, rightSlots.Count);
+                deltaX = xExtent + rightSlots[r];
+                rightSlots.RemoveAt(r);
+            }
+
+            Vector3 spawnPosition = new Vector3(
+                start + deltaX,
+                bounds.max.y + deltaY,
+                0f
+            );
+
+            Emitter emitter = Instantiate(emitterPrefab, spawnPosition, Quaternion.identity);
+            emitter.SetRepititions(repetitions);
+
+            emitters.Add(emitter.gameObject);
+            if (isChoiceLeft)
+                leftEmitters.Add(emitter.gameObject);
+            else
+                rightEmitters.Add(emitter.gameObject);
+
+            float emitterHalfHeight = emitter.GetComponent<Collider2D>().bounds.extents.y / 2;
+            emitter.transform.Translate(0, emitterHalfHeight, 0);
         }
     }
 
+    /// <summary>
+    /// Returns the nearest emitter on the same side of the middle wall as t,
+    /// or null if there is none. Callers must handle null.
+    /// </summary>
     public GameObject getNearestEmitter(Transform t)
     {
-        GameObject nearestEmitter = null;
+        if (t == null) return null;
+
         var middleWall = GameObject.FindWithTag("middle_wall");
-        float nearestDistance = 0.0f;
+        if (middleWall == null) return null;
+
         bool isLeftPlayer = middleWall.transform.position.x > t.position.x;
         var emittersToCheck = isLeftPlayer ? leftEmitters : rightEmitters;
-        foreach (var e in emittersToCheck) {
-            var diff = t.position.x - e.transform.position.x;
 
-            //var pos = transform.position;
-            //pos.y ;
-            //var leftCast = Physics2D.Raycast(transform.Translate(0, 1, 0).transform.position, Vector2.left);
-            //var rightCast = Physics2D.Raycast(transform.position, Vector2.right);
-            //var leftO = leftCast.collider.gameObject;
-            //var rightO = rightCast.collider.gameObject;
+        GameObject nearest = null;
+        float nearestDistance = float.MaxValue;
 
-            if (nearestEmitter == null || System.Math.Abs(nearestDistance) > System.Math.Abs(diff))
+        for (int i = emittersToCheck.Count - 1; i >= 0; i--)
+        {
+            var e = emittersToCheck[i];
+
+            // Unity's == null also catches destroyed objects.
+            if (e == null)
             {
-                nearestDistance = diff;
-                nearestEmitter = e;
+                emittersToCheck.RemoveAt(i);
+                continue;
             }
-            ;
+
+            float dist = Mathf.Abs(t.position.x - e.transform.position.x);
+            if (dist < nearestDistance)
+            {
+                nearestDistance = dist;
+                nearest = e;
+            }
         }
-        return nearestEmitter;
+        return nearest;
     }
 
     public void Test()
@@ -232,7 +232,8 @@ public class GameManager : MonoBehaviour
         Game.Instance.CheckAnswer();
     }
 
-    public void ListenToSubmission() { 
+    public void ListenToSubmission()
+    {
         Game.Instance.PlaySubmission();
     }
 
