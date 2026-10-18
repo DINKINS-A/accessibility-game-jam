@@ -99,7 +99,7 @@ public class UIManager : MonoBehaviour
     }
 
     // MainMenu
-    public void OnPlayButtonClicked() => SceneManager.LoadScene("Level1");
+    public void OnPlayButtonClicked() => SceneManager.LoadScene("LevelT");
     public void OnExitButtonClicked() => Application.Quit();
 
     public void OnOptionsButtonClicked()

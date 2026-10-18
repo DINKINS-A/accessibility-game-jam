@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 public class Emitter : MonoBehaviour
 {
@@ -87,7 +88,8 @@ public class Emitter : MonoBehaviour
     {
         for (int count = 0; count < 5; count++)
         {
-            GamepadTarget target = name.Equals("DualSenseGamepadHID") ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
+            int index = 0;// Gamepad.all.IndexOfReference((Gamepad)device);
+            GamepadTarget target = index == 0 ? GamepadTarget.Gamepad1 : GamepadTarget.Gamepad2;
             HapticsManager.Instance.Rumble(Motor.Left, 0.025f, target);
             await Task.Delay(500);
         }
