@@ -5,6 +5,7 @@ using UnityEngine.Events;
 
 public enum TONE
 {
+    NONE,
     TRIANGLE,
     CIRCLE,
     CROSS,
