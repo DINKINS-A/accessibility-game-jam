@@ -1,34 +1,35 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    // Seed must be non-zero for Unity.Mathematics.Random.
+    private Unity.Mathematics.Random prng = new Unity.Mathematics.Random(MakeSeed());
 
-    Unity.Mathematics.Random prng = new Unity.Mathematics.Random((uint)DateTime.Now.Second);
-
-    //[System.Serializable]
-    //public class ToneMapping
-    //{
-    //    public int toneId;
-    //    public AudioSource audioSource;
-    //}
-
-    //[SerializeField] private ToneMapping[] toneMappings;
-
-    //private Dictionary<int, AudioSource> toneAudioMap;
+    private static uint MakeSeed()
+    {
+        uint seed = (uint)Environment.TickCount;
+        return seed == 0 ? 1u : seed;
+    }
 
     [SerializeField] public Emitter emitterPrefab;
 
+    private bool PlayerWon = false;
+    private bool transitioning = false;
+    private float Delay = 5f;
+
     public static GameManager Instance { get; private set; }
 
-    List<GameObject> emitters;
-    List<GameObject> leftEmitters;
-    List<GameObject> rightEmitters;
+    // Initialised inline so they are never null, even on a duplicate instance
+    // that is about to be destroyed.
+    private readonly List<GameObject> emitters = new List<GameObject>();
+    private readonly List<GameObject> leftEmitters = new List<GameObject>();
+    private readonly List<GameObject> rightEmitters = new List<GameObject>();
 
     void Awake()
     {
@@ -38,23 +39,50 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
-        emitters = new List<GameObject>();
-
-        leftEmitters = new List<GameObject>();
-
-        rightEmitters = new List<GameObject>();
         DontDestroyOnLoad(gameObject);
     }
-
     private void Start()
     {
+        Debug.Log("START WORKING");
     }
-
-
-    public void Enqueue(TONE tone)
+    void Update()
     {
-        Game.Instance.Enqueue(tone);
+        // Only start the transition once per level.
+
+        Game.Instance.CheckWin();
+        //{
+        //    Debug.Log("UPDATE WORKING3");
+        //    PlayerWon = true;
+        //    Debug.Log("UPDATE WORKING4");
+        //    TransitionTONext();
+        //    Debug.Log("UPDATE WORKING5");
+        //    Debug.Log("player won");
+          
+        //}
     }
+
+    public void TransitionTONext()
+    {
+        if (transitioning) return;
+        transitioning = true;
+        StartCoroutine(Scenetransition());
+    }
+
+    IEnumerator Scenetransition()
+    {
+        yield return new WaitForSeconds(Delay);
+
+        int next = SceneManager.GetActiveScene().buildIndex + 1;
+        if (next < SceneManager.sceneCountInBuildSettings)
+        {
+            SceneManager.LoadScene(next);
+        }
+        else
+        {
+            SceneManager.LoadScene("menu");
+        }
+    }
+
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -65,13 +93,39 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode mode)
+    void OnDestroy()
     {
+        if (Instance == this) Instance = null;
+    }
+
+    public void Enqueue(TONE tone)
+    {
+        Game.Instance.Enqueue(tone);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Ignore duplicate instances that are being destroyed.
+        if (Instance != this) return;
+
+        // This object persists across scenes, so reset per-level state here.
+        transitioning = false;
+        PlayerWon = false;
+
         LoadLevel(scene);
     }
 
-    public void LoadLevel(UnityEngine.SceneManagement.Scene scene)
+    private void ClearEmitters()
     {
+        emitters.Clear();
+        leftEmitters.Clear();
+        rightEmitters.Clear();
+    }
+
+    public void LoadLevel(Scene scene)
+    {
+        // The previous scene's emitters are already destroyed. Drop the stale references.
+        ClearEmitters();
         //SceneManager.LoadScene("Levels/" + levelId);
         TextAsset file = Resources.Load<TextAsset>($"{scene.name}");
         List<string> answerConfig = null;
@@ -94,7 +148,8 @@ public class GameManager : MonoBehaviour
             if (answerConfig.Count != 2)
             {
                 Debug.LogError($"Expected 2 lines file: {scene.name}");
-            } else
+            }
+            else
             {
                 answer = answerConfig[0];
                 distribution = answerConfig[1];
@@ -105,7 +160,6 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError($"{scene.name} textfile with pattern / answer not found");
         }
-        GameObject obj = GameObject.FindWithTag("Ground");
 
         int totalEmitters = 0;
 
@@ -118,19 +172,19 @@ public class GameManager : MonoBehaviour
         }
 
 
-        if (obj != null)
+        var groundCollider = ground.GetComponent<Collider2D>();
+        if (groundCollider == null)
         {
-            var emitterCollider = obj.GetComponent<Collider2D>();
-            // dont fly away
-            Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.constraints |= RigidbodyConstraints2D.FreezePositionY;
-            }
-            Bounds bounds = emitterCollider.bounds;
+            Debug.LogError("Ground GameObject has no Collider2D.");
+            return;
+        }
 
-            float leftBound = bounds.min.x;
-            float rightBound = bounds.max.x;
+        // don't fly away
+        Rigidbody2D rb = ground.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.constraints |= RigidbodyConstraints2D.FreezePositionY;
+        }
 
 
             float start = bounds.min.x + 1;
@@ -237,31 +291,42 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the nearest emitter on the same side of the middle wall as t,
+    /// or null if there is none. Callers must handle null.
+    /// </summary>
     public GameObject getNearestEmitter(Transform t)
     {
-        GameObject nearestEmitter = null;
+        if (t == null) return null;
+
         var middleWall = GameObject.FindWithTag("middle_wall");
-        float nearestDistance = 0.0f;
+        if (middleWall == null) return null;
+
         bool isLeftPlayer = middleWall.transform.position.x > t.position.x;
         var emittersToCheck = isLeftPlayer ? leftEmitters : rightEmitters;
-        foreach (var e in emittersToCheck) {
-            var diff = t.position.x - e.transform.position.x;
 
-            //var pos = transform.position;
-            //pos.y ;
-            //var leftCast = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y), Vector2.left);
-            //var rightCast = Physics2D.Raycast(transform.position, Vector2.right);
-            //var leftO = leftCast.collider.gameObject;
-            //var rightO = rightCast.collider.gameObject;
+        GameObject nearest = null;
+        float nearestDistance = float.MaxValue;
 
-            if (nearestEmitter == null || System.Math.Abs(nearestDistance) > System.Math.Abs(diff))
+        for (int i = emittersToCheck.Count - 1; i >= 0; i--)
+        {
+            var e = emittersToCheck[i];
+
+            // Unity's == null also catches destroyed objects.
+            if (e == null)
             {
-                nearestDistance = diff;
-                nearestEmitter = e;
+                emittersToCheck.RemoveAt(i);
+                continue;
             }
-            ;
+
+            float dist = Mathf.Abs(t.position.x - e.transform.position.x);
+            if (dist < nearestDistance)
+            {
+                nearestDistance = dist;
+                nearest = e;
+            }
         }
-        return nearestEmitter;
+        return nearest;
     }
 
     public void Test()
@@ -269,7 +334,8 @@ public class GameManager : MonoBehaviour
         Game.Instance.CheckAnswer();
     }
 
-    public void ListenToSubmission() { 
+    public void ListenToSubmission()
+    {
         Game.Instance.PlaySubmission();
     }
 

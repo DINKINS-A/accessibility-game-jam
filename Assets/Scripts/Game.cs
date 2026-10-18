@@ -48,9 +48,23 @@ public class Game : MonoBehaviour
     }
 
 
-    void Start()
+
+    public bool CheckWin()
     {
-        
+        if (answer.Count == 0 || submission.Count == 0) return false;
+        var a = submission.ToList();
+        var b = answer.ToList();
+        for (int i = 0; i < submission.Count; ++i)
+        {
+
+            if (!a[i].Equals(b[i]))
+            {
+                Debug.Log("Lose");
+                return false;
+            }
+        }
+        Debug.Log("Win");
+        return true;
     }
 
     public void SetAnswer(Queue<TONE> answer)
