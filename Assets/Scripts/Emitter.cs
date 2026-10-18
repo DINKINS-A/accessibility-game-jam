@@ -92,10 +92,12 @@ public class Emitter : MonoBehaviour
      */
     private async void EmitterLocated(PlayerController controller, GamepadTarget target)
     {
-        for (int count = 0; count < 5; count++)
+        for (int count = 0; count < 3; count++)
         {
             HapticsManager.Instance.Rumble(Motor.Left, 0.025f, target);
-            await Task.Delay(500);
+            await Task.Delay(150);
+            HapticsManager.Instance.Rumble(Motor.Left, 0.025f, target);
+            await Task.Delay(350);
         }
     }
 }

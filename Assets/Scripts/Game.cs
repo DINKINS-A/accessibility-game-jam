@@ -53,6 +53,11 @@ public class Game : MonoBehaviour
         
     }
 
+    public bool CheckWin()
+    {
+        return submission.Equals(answer);
+    }
+
     public void SetAnswer(Queue<TONE> answer)
     {
         this.answer = answer;
