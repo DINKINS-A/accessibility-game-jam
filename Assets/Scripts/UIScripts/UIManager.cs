@@ -52,7 +52,7 @@ public class UIManager : MonoBehaviour
             Bind(Exit, OnExitButtonClicked);
             Bind(OptionsBack, OnOptionBackButtonClicked);
         }
-        else if (scene.name == "Level1")
+        else if (scene.name == "LevelT")
         {
             PauseMenu = GetObj(root, "PauseMenu");
             PauseOptionsMenu = GetObj(root, "OptionsMenu");
