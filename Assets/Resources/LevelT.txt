@@ -1,7 +1,2 @@
-<<<<<<< Updated upstream
-AABB
-112
-=======
 AABBCC
 1122
->>>>>>> Stashed changes
