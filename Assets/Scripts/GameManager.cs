@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,6 +19,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] public Emitter emitterPrefab;
 
+    private bool PlayerWon = false;
+    private bool transitioning = false;
+    private float Delay = 5f;
+
     public static GameManager Instance { get; private set; }
 
     // Initialised inline so they are never null, even on a duplicate instance
@@ -35,6 +40,47 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+    private void Start()
+    {
+        Debug.Log("START WORKING");
+    }
+    void Update()
+    {
+        // Only start the transition once per level.
+
+        Game.Instance.CheckWin();
+        //{
+        //    Debug.Log("UPDATE WORKING3");
+        //    PlayerWon = true;
+        //    Debug.Log("UPDATE WORKING4");
+        //    TransitionTONext();
+        //    Debug.Log("UPDATE WORKING5");
+        //    Debug.Log("player won");
+          
+        //}
+    }
+
+    public void TransitionTONext()
+    {
+        if (transitioning) return;
+        transitioning = true;
+        StartCoroutine(Scenetransition());
+    }
+
+    IEnumerator Scenetransition()
+    {
+        yield return new WaitForSeconds(Delay);
+
+        int next = SceneManager.GetActiveScene().buildIndex + 1;
+        if (next < SceneManager.sceneCountInBuildSettings)
+        {
+            SceneManager.LoadScene(next);
+        }
+        else
+        {
+            SceneManager.LoadScene("menu");
+        }
     }
 
     void OnEnable()
@@ -61,6 +107,11 @@ public class GameManager : MonoBehaviour
     {
         // Ignore duplicate instances that are being destroyed.
         if (Instance != this) return;
+
+        // This object persists across scenes, so reset per-level state here.
+        transitioning = false;
+        PlayerWon = false;
+
         LoadLevel(scene);
     }
 
@@ -75,30 +126,50 @@ public class GameManager : MonoBehaviour
     {
         // The previous scene's emitters are already destroyed. Drop the stale references.
         ClearEmitters();
+        //SceneManager.LoadScene("Levels/" + levelId);
+        TextAsset file = Resources.Load<TextAsset>($"{scene.name}");
+        List<string> answerConfig = null;
+        string answer = null;
+        string distribution = null;
 
-        string path = Path.Combine(
-            Application.dataPath,
-            $"Levels/{scene.name}/answer.txt"
-        );
-
-        // Scenes without an answer file (e.g. the menu) are not levels.
-        if (!File.Exists(path))
+        if (file != null)
         {
-            Debug.Log($"No answer file for scene '{scene.name}' ({path}). Skipping level setup.");
-            return;
+            var lines = file.text.Split(
+                new[] { "\r\n", "\n", "\r" },
+                StringSplitOptions.None
+            ).ToList();
+
+            foreach (string line in lines)
+            {
+                Debug.Log(line);
+            }
+
+            answerConfig = lines;
+            if (answerConfig.Count != 2)
+            {
+                Debug.LogError($"Expected 2 lines file: {scene.name}");
+            }
+            else
+            {
+                answer = answerConfig[0];
+                distribution = answerConfig[1];
+            }
+            Debug.Log(answerConfig);
+        }
+        else
+        {
+            Debug.LogError($"{scene.name} textfile with pattern / answer not found");
         }
 
-        List<string> answerConfig = File.ReadLines(path).ToList();
-        if (answerConfig.Count != 2)
+        int totalEmitters = 0;
+
+        if (answerConfig != null && distribution != null)
         {
-            Debug.LogError($"Expected 2 lines in file: {path}");
-            return;
+            var pattern = answerConfig[0];
+            Game.Instance.SetAnswer(Game.Instance.ParseAnswerLine(pattern));
+
+            totalEmitters = distribution.Length;
         }
-
-        string pattern = answerConfig[0];
-        string distribution = answerConfig[1];
-
-        Game.Instance.SetAnswer(Game.Instance.ParseAnswerLine(pattern));
 
         GameObject ground = GameObject.FindWithTag("Ground");
         if (ground == null)
@@ -150,9 +221,11 @@ public class GameManager : MonoBehaviour
             }
 
             bool wantLeft = prng.NextBool() && totalLeft < distribution.Length / 2;
+            bool leftAvailable = leftSlots.Count > 0;
+            bool rightAvailable = rightSlots.Count > 0;
 
-            // Fall back to the other side if the chosen side has no free slots.
-            bool isChoiceLeft = wantLeft ? leftSlots.Count > 0 : rightSlots.Count == 0;
+            // Use the preferred side, falling back to the other if it has no free slots.
+            bool isChoiceLeft = (wantLeft && leftAvailable) || !rightAvailable;
 
             float deltaX;
             if (isChoiceLeft)

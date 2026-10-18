@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7641576115797449276}
   - component: {fileID: 6394589191349683762}
-  - component: {fileID: 6507801712304983265}
   - component: {fileID: 6570285129001093122}
   - component: {fileID: -2542236448439212635}
   - component: {fileID: 2864515371646990866}
@@ -49,22 +48,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   emitterPrefab: {fileID: 6507964735003306200, guid: 966e5048259439b44aa83283fc4098ec, type: 3}
---- !u!114 &6507801712304983265
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2142287528629407334}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e3ef6b8f22c4e649942563ff8a8908a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CountdownTimer
-  duration: 60
-  startOnAwake: 1
-  useUnscaledTime: 0
-  label: {fileID: 0}
 --- !u!114 &6570285129001093122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,7 +99,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
