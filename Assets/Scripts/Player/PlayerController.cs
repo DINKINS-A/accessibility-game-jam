@@ -11,7 +11,8 @@ public class PlayerController : MonoBehaviour
         Gamepad2
     }
 
-    public const int RUMBLE_DURATION_SECONDS = 2;
+    public Emitter? touchingEmitter;
+    public const float RUMBLE_DURATION_SECONDS = 1f;
     public AudioSource UniversalAudioSource;
     [Header("Input")]
     [Tooltip("Drag your PlayerInput.inputactions asset here (same asset on both players)")]
@@ -50,6 +51,39 @@ public class PlayerController : MonoBehaviour
         rightShoulderAction = playerMap.FindAction("Right Shoulder", true);
         leftShoulderAction.performed +=
                 context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
+        southAction.performed +=
+                context => SetActiveEmitter(TONE.CROSS);
+        westAction.performed +=
+                context => SetActiveEmitter(TONE.SQUARE);
+        eastAction.performed +=
+                context => SetActiveEmitter(TONE.CIRCLE);
+        northAction.performed +=
+                context => SetActiveEmitter(TONE.TRIANGLE);
+    }
+
+        //rightShoulderAction.performed +=
+        //    context => TryAssignNote(GameManager.Instance.getNearestEmitter(transform));
+
+    public void SetTouchingEmitter(Emitter e)
+    {
+        touchingEmitter = e;
+    }
+    public void UnsetTouchingEmitter()
+    {
+        touchingEmitter = null;
+    }
+
+    private void SetActiveEmitter(TONE tone)
+    {
+        if (touchingEmitter)
+        {
+            touchingEmitter.Assign(tone);
+            Debug.Log("Set touching emitter to " + tone);
+        } else
+        {
+            Debug.Log("No touching emitter found.");
+        }
+
     }
 
     private void VibrateLeftOrRight(GameObject o, string name)
@@ -153,7 +187,7 @@ public class PlayerController : MonoBehaviour
 
     public bool isRightShoulderButtonHeld()
     {
-        return rightAction.WasPerformedThisFrame();
+        return rightShoulderAction.WasPerformedThisFrame();
     }
 
     public bool isNorthActionButtonPressed()

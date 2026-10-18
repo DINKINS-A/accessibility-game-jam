@@ -13,6 +13,8 @@ public class AudioManager : MonoBehaviour
     public AudioClip failClip;
     public AudioClip successClip;
 
+    public AudioSource audioSource;
+
     public static AudioManager Instance { get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -50,4 +52,6 @@ public class AudioManager : MonoBehaviour
     public AudioClip GetFailClip() { return failClip; }
 
     public AudioClip GetSuccessClip() { return successClip; }
+
+    public void PlayClip(AudioClip clip) { audioSource.PlayOneShot(clip); }
 }

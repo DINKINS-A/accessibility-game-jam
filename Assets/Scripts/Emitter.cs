@@ -8,7 +8,6 @@ public class Emitter : MonoBehaviour
     private short repititions;
     private int playerID;
     private PlayerController playerController;
-    
     void Start()
     {
         repititions = 0;
@@ -17,76 +16,41 @@ public class Emitter : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("OnTriggerEnter2D" + collision.name);
+        //Debug.Log("OnTriggerEnter2D" + collision.name);
         playerController = collision.GetComponent<PlayerController>();
+        playerController.SetTouchingEmitter(this);
+        Debug.Log("set touching emitter");
     }
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
+    //private void OnCollisionEnter2D(Collision2D collision)
+    //{
 
-        Debug.Log(collision.collider.transform.position.x.ToString());
-        playerController = collision.gameObject.GetComponent<PlayerController>();
-    }
+    //    Debug.Log(collision.collider.transform.position.x.ToString());
+    //    playerController = collision.gameObject.GetComponent<PlayerController>();
+    //}
+    //private void OnCollisionExit2D(Collision2D collision)
+    //{
+    //    playerController = null;
+    //}
     //Upon collision with another GameObject, this GameObject will reverse direction
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerExit2D(Collider2D collision)
     {
-        Debug.Log("OnTriggerEnter" + other.name);
-        // TODO: Player Input Manager component
-        //  limit 2 players
-        //  assign persistent player identity on join (left or right) 
-        //  PlayerInput.playerIndex identifies the joined player,
-        //  store player index in player controller class, get in collider, retrieve index
-
-        //PlayerController player =
-        //    other.GetComponentInParent<PlayerController>();
-
-        //if (player == null)
-        //    return;
-
-        //if (player.pressedButton != -1)
-        //{
-        //    assignedInt = player.pressedButton;
-
-        //    Debug.Log(
-        //        $"Player {player.playerId} assigned value {assignedInt}"
-        //    );
-        //}
-
-        //if (other.CompareTag("Player"))
-        //{
-        //    playerOnPlatform = true;
-        //    Debug.Log("Press E to activate platform");
-        //}
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        //if (other.CompareTag("Player"))
-        //{
-        //    playerOnPlatform = false;
-        //}
+        //playerController.UnsetTouchingEmitter();
+        //playerController = null;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (playerController)
-        {
-            var a = playerController.isRightShoulderButtonHeld();
-            var b = playerController.isSouthActionButtonPressed();
-            if (playerController.isRightShoulderButtonHeld() && playerController.isSouthActionButtonPressed())
-            {
-                currentTone = TONE.CROSS;
-            }
-        }
     }
 
     /*
      * Assign which player this emitter belongs to
      */
 
-    public void Assign(int playerID)
+    public void Assign(TONE currentTone)
     {
-        this.playerID = playerID;
+        this.currentTone = currentTone;
+        AudioManager.Instance.PlayClip(AudioManager.Instance.GetSuccessClip());
     }
 
     
