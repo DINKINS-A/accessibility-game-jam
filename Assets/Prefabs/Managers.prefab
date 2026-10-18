@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6394589191349683762}
   - component: {fileID: 6507801712304983265}
   - component: {fileID: 6570285129001093122}
+  - component: {fileID: -2542236448439212635}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -86,3 +87,19 @@ MonoBehaviour:
   successClip: {fileID: 8300000, guid: 0d444ecd1c64c0b41ad67ab8e5884eef, type: 3}
   emitterLocatedClip: {fileID: 8300000, guid: 61404feb142a218449891e64f6db5005, type: 3}
   audioSource: {fileID: 4799020006747472164, guid: 317861cb8236d3c4ab6b498c6e6eb50f, type: 3}
+--- !u!114 &-2542236448439212635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142287528629407334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83ead4a144424a647adf7f04c939f935, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game
+  triangleTone: {fileID: 0}
+  squareTone: {fileID: 0}
+  circleTone: {fileID: 0}
+  crossTone: {fileID: 0}
