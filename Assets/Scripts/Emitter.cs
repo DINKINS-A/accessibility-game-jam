@@ -42,11 +42,11 @@ public class Emitter : MonoBehaviour
     {
         if (this.currentTone != TONE.NONE)
         {
-            AudioManager.Instance.PlayClip(AudioManager.Instance.GetFailClip());
+            AudioManager.Instance.PlayFailClip();
             return;
         }
         this.currentTone = currentTone;
-        AudioManager.Instance.PlayClip(AudioManager.Instance.GetSuccessClip());
+        AudioManager.Instance.PlaySuccessClip();
     }
 
     

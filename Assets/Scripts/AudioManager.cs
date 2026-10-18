@@ -35,25 +35,16 @@ public class AudioManager : MonoBehaviour
 
     }
 
-    public AudioClip GetNorthTone() { return northTone; }
+    public void PlayWallsClip() {
+        audioSource.PlayOneShot(wallsClip);
+    }
 
-    public AudioClip GetSouthTone() { return southTone; }
+    public void PlayWinClip() { audioSource.PlayOneShot(winClip); }
 
-    public AudioClip GetEastTone() { return eastTone; }
+    public void PlayFailClip() { audioSource.PlayOneShot(failClip); }
 
-    public AudioClip GetWestTone() { return westTone; }
+    public void PlaySuccessClip() { audioSource.PlayOneShot(successClip); }
 
-    public AudioClip GetWallsClip() {
-        Debug.Log("audio");
-            return wallsClip; }
-
-    public AudioClip GetWinClip() { return winClip; }
-
-    public AudioClip GetFailClip() { return failClip; }
-
-    public AudioClip GetSuccessClip() { return successClip; }
-
-    public void PlayClip(AudioClip clip) { audioSource.PlayOneShot(clip); }
 
     public void PlayTone(TONE tone)
     {

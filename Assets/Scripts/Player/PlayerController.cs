@@ -161,8 +161,8 @@ public class PlayerController : MonoBehaviour
     {
        if(collision.gameObject.CompareTag("walls") || collision.gameObject.CompareTag("middle_wall"))
         {
-            
-            UniversalAudioSource.PlayOneShot(AudioManager.Instance.GetWallsClip());
+
+            AudioManager.Instance.PlayWallsClip();
         }
     }
 
