@@ -54,4 +54,30 @@ public class AudioManager : MonoBehaviour
     public AudioClip GetSuccessClip() { return successClip; }
 
     public void PlayClip(AudioClip clip) { audioSource.PlayOneShot(clip); }
+
+    public void PlayTone(TONE tone)
+    {
+        switch (tone)
+        {
+            case TONE.TRIANGLE:
+                PlayNorthTone();
+                break;
+            case TONE.CIRCLE:
+                PlayEastTone();
+                break;
+            case TONE.CROSS:
+                PlaySouthTone();
+                break;
+            case TONE.SQUARE:
+                PlayWestTone();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void PlayNorthTone() { audioSource.PlayOneShot(northTone); }
+    private void PlaySouthTone() { audioSource.PlayOneShot(southTone); }
+    private void PlayWestTone() { audioSource.PlayOneShot(westTone); }
+    private void PlayEastTone() { audioSource.PlayOneShot(eastTone); }
 }
