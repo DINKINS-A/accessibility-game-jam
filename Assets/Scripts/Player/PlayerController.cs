@@ -34,6 +34,8 @@ public class PlayerController : MonoBehaviour
     private InputAction westAction;
     private InputAction leftShoulderAction;
     private InputAction rightShoulderAction;
+    private InputAction leftTriggerAction;
+    private InputAction rightTriggerAction;
     public Rigidbody2D rb2D;
 
     private void Awake()
@@ -50,6 +52,8 @@ public class PlayerController : MonoBehaviour
         westAction = playerMap.FindAction("West", true);
         leftShoulderAction = playerMap.FindAction("Left Shoulder", true);
         rightShoulderAction = playerMap.FindAction("Right Shoulder", true);
+        leftTriggerAction = playerMap.FindAction("Left Trigger", true);
+        rightTriggerAction = playerMap.FindAction("Right Trigger", true);
         leftShoulderAction.performed +=
                 context => VibrateLeftOrRight(GameManager.Instance.getNearestEmitter(transform), context.control.device.name);
         southAction.performed +=

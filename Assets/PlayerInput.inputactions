@@ -77,6 +77,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Right Trigger",
+                    "type": "Button",
+                    "id": "0d6fe43a-560a-4a83-a283-ae3099935ab4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Left Trigger",
+                    "type": "Button",
+                    "id": "f78cdcb3-7ee2-4f47-a297-7057d10ffb6d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -187,6 +205,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Right Shoulder",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4b95a521-0910-4d8b-9963-137ca0cf2563",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Right Trigger",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0e0326b5-4044-4a31-a91a-47c9cff42e80",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Left Trigger",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
