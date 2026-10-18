@@ -24,6 +24,7 @@ public class Emitter : MonoBehaviour
         //Debug.Log("OnTriggerEnter2D" + collision.name);
         playerController = collision.GetComponent<PlayerController>();
         playerController.SetTouchingEmitter(this);
+        AudioManager.Instance.PlayEmitterLocatedClip();
         Debug.Log("set touching emitter");
     }
 

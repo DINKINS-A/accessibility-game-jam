@@ -12,6 +12,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip loseClip;
     public AudioClip failClip;
     public AudioClip successClip;
+    public AudioClip emitterLocatedClip;
 
     public AudioSource audioSource;
 
@@ -44,6 +45,8 @@ public class AudioManager : MonoBehaviour
     public void PlayFailClip() { audioSource.PlayOneShot(failClip); }
 
     public void PlaySuccessClip() { audioSource.PlayOneShot(successClip); }
+
+    public void PlayEmitterLocatedClip() { audioSource.PlayOneShot(emitterLocatedClip); }
 
 
     public void PlayTone(TONE tone)
