@@ -1,5 +1,6 @@
 using Unity.AppUI.Editor;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
@@ -81,10 +82,13 @@ public class PlayerController : MonoBehaviour
             Debug.Log("Set touching emitter to " + tone);
         } else
         {
+            AudioManager.Instance.PlayTone(tone);
             Debug.Log("No touching emitter found.");
         }
 
     }
+
+
 
     private void VibrateLeftOrRight(GameObject o, string name)
     {
@@ -155,7 +159,7 @@ public class PlayerController : MonoBehaviour
     }
     public void OnCollisionEnter2D(Collision2D collision)
     {
-       if(collision.gameObject.CompareTag("walls"))
+       if(collision.gameObject.CompareTag("walls") || collision.gameObject.CompareTag("middle_wall"))
         {
             
             UniversalAudioSource.PlayOneShot(AudioManager.Instance.GetWallsClip());

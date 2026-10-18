@@ -10,6 +10,7 @@ public class Emitter : MonoBehaviour
     private PlayerController playerController;
     void Start()
     {
+        currentTone = TONE.NONE;
         repititions = 0;
         //gameObject.SendMessage("Enqueue", 5.0);
     }
@@ -21,21 +22,11 @@ public class Emitter : MonoBehaviour
         playerController.SetTouchingEmitter(this);
         Debug.Log("set touching emitter");
     }
-    //private void OnCollisionEnter2D(Collision2D collision)
-    //{
 
-    //    Debug.Log(collision.collider.transform.position.x.ToString());
-    //    playerController = collision.gameObject.GetComponent<PlayerController>();
-    //}
-    //private void OnCollisionExit2D(Collision2D collision)
-    //{
-    //    playerController = null;
-    //}
-    //Upon collision with another GameObject, this GameObject will reverse direction
     private void OnTriggerExit2D(Collider2D collision)
     {
-        //playerController.UnsetTouchingEmitter();
-        //playerController = null;
+        playerController.UnsetTouchingEmitter();
+        playerController = null;
     }
 
     // Update is called once per frame
@@ -49,6 +40,11 @@ public class Emitter : MonoBehaviour
 
     public void Assign(TONE currentTone)
     {
+        if (this.currentTone != TONE.NONE)
+        {
+            AudioManager.Instance.PlayClip(AudioManager.Instance.GetFailClip());
+            return;
+        }
         this.currentTone = currentTone;
         AudioManager.Instance.PlayClip(AudioManager.Instance.GetSuccessClip());
     }
