@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -6,10 +7,9 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
-
     // Main menu references
     GameObject MainMenu, OptionsMenu;
-    Button Play, Level1, Level2, Level3, Level4, Level5, Level6, Level7, Options, Exit, OptionsBack;
+    Button Play, LevelT, Level1, Level2, Level3, Level4, Level5, Level6, Level7, Options, Exit, OptionsBack;
 
     // Pause menu references
     GameObject PauseMenu, PauseOptionsMenu;
@@ -43,6 +43,7 @@ public class UIManager : MonoBehaviour
             MainMenu = GetObj(root, "MainMenu");
             OptionsMenu = GetObj(root, "OptionsMenu");
             Play = Get<Button>(root, "PlayButton");
+            LevelT = Get<Button>(root, "LevelT");
             Level1 = Get<Button>(root, "Level1");
 
             Level2 = Get<Button>(root, "Level2");
@@ -56,11 +57,16 @@ public class UIManager : MonoBehaviour
             Level6 = Get<Button>(root, "Level6");
 
             Level7 = Get<Button>(root, "Level7");
+            var levels = new Button[]{ LevelT, Level1, Level2, Level3, Level4, Level5, Level6, Level7 };
+            foreach(var b in levels) {
+                b.gameObject.SetActive(false);
+            }
             Options = Get<Button>(root, "OptionsButton");
             Exit = Get<Button>(root, "ExitButton");
             OptionsBack = Get<Button>(root, "BackButton");
 
             Bind(Play, OnPlayButtonClicked);
+            Bind(LevelT, () => SceneManager.LoadScene("LevelT"));
             Bind(Level1, () => SceneManager.LoadScene("Level1"));
             Bind(Level2, () => SceneManager.LoadScene("Level2"));
             Bind(Level3, () => SceneManager.LoadScene("Level3"));
@@ -72,6 +78,8 @@ public class UIManager : MonoBehaviour
             Bind(Options, OnOptionsButtonClicked);
             Bind(Exit, OnExitButtonClicked);
             Bind(OptionsBack, OnOptionBackButtonClicked);
+
+            SelectFirstButton(transform);
         }
         else if (scene.name == "LevelT")
         {
@@ -105,7 +113,20 @@ public class UIManager : MonoBehaviour
         Debug.LogWarning(objName + " not found");
         return null;
     }
+    void SelectFirstButton(Transform root)
+    {
+        Button[] buttons = root.GetComponentsInChildren<Button>(true);
 
+        foreach (Button button in buttons)
+        {
+            if (button.gameObject.activeInHierarchy && button.interactable)
+            {
+                UnityEngine.EventSystems.EventSystem.current
+                    ?.SetSelectedGameObject(button.gameObject);
+                return;
+            }
+        }
+    }
     T Get<T>(Transform root, string objName) where T : Component
     {
         var go = GetObj(root, objName);
@@ -120,7 +141,25 @@ public class UIManager : MonoBehaviour
     }
 
     // MainMenu
-    public void OnPlayButtonClicked() => SceneManager.LoadScene("LevelT");
+    public void OnPlayButtonClicked() {
+        Play.gameObject.SetActive(false);
+        Options.gameObject.SetActive(false);
+        Exit.gameObject.SetActive(false);
+
+        LevelT.gameObject.SetActive(true);
+        Level1.gameObject.SetActive(true);
+        Level2.gameObject.SetActive(true);
+        Level3.gameObject.SetActive(true);
+        Level4.gameObject.SetActive(true);
+        Level5.gameObject.SetActive(true);
+        Level6.gameObject.SetActive(true);
+        Level7.gameObject.SetActive(true);
+
+        UnityEngine.EventSystems.EventSystem.current
+                    ?.SetSelectedGameObject(LevelT.gameObject);
+        //SceneManager.LoadScene("LevelT");
+    }
+
     public void OnExitButtonClicked() => Application.Quit();
 
     public void OnOptionsButtonClicked()

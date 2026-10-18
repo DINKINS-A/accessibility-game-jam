@@ -88,7 +88,7 @@ public class PlayerController : MonoBehaviour
 
     private void SetActiveEmitter(TONE tone)
     {
-        if (touchingEmitter)
+        if (touchingEmitter != null)
         {
             touchingEmitter.Assign(tone);
             Debug.Log("Set touching emitter to " + tone);
