@@ -162,11 +162,14 @@ public class GameManager : MonoBehaviour
                     0f
                 );
 
-                var isLeft = prng.NextBool();
                 float deltaY = 0.5f;
                 float deltaX = 2;
-                bool isChoiceLeft = (totalLeft < distribution.Length / 2) && isLeft;
-                if (isChoiceLeft)
+
+                var isLeft = prng.NextBool();
+                bool isForceLeft = totalRight >= distribution.Length / 2;
+                bool isForceRight = totalLeft >= distribution.Length / 2;
+
+                if (isForceLeft || (isLeft && !isForceRight))
                 {
                     // forse spawn on the right side
                     var r = prng.NextInt(0, leftSlots.Count - 1);
@@ -175,7 +178,7 @@ public class GameManager : MonoBehaviour
                     totalLeft++;
                 } else
                 {
-                    // forse spawn on the left side
+                    // forse spawn on the right side
                     var r = prng.NextInt(0, rightSlots.Count - 1);
                     deltaX = xExtent + rightSlots[r];
                     rightSlots.RemoveAt(r);
@@ -190,7 +193,7 @@ public class GameManager : MonoBehaviour
                 );
                 emitter.SetRepititions(repetitions);
                 emitters.Add(emitter.gameObject);
-                if (isChoiceLeft)
+                if (isLeft && !isForceRight)
                 {
                     leftEmitters.Add(emitter.gameObject);
                 }
